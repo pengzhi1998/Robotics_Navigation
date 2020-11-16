@@ -26,8 +26,10 @@ model.switch_to_eval()
 
 class UWsimWorld():
     def __init__(self):
-        self.goal_table = np.array([[-20, -5], [-12, 9], [0, 0], [-10, -14], [-19, 8]])
-        # self.goal_table = np.array([[-12, -7.5]])
+        # self.goal_table = np.array([[-20, -5], [-12, 9], [0, 0], [-10, -14], [-19, 8]]) # goals for multi..
+        # self.goal_table = np.array([[-12, -8]]) # goal for L (single) obstacle
+        # self.goal_table = np.array([[-12, -7.5]])  # goal for channel
+        self.goal_table = np.array([[-15, 17]])  # goal for shipwreck obstacle
         rospy.init_node('uwsim', anonymous=False)
         self.cmd_vel = rospy.Publisher('g500/velocityCommand', TwistStamped, queue_size=10)
         # self.cmd_vel = rospy.Publisher('vel', TwistStamped, queue_size=10)
