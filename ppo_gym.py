@@ -64,7 +64,7 @@ depth_dim = env.observation_space_depth.shape[0]
 goal_dim = env.observation_space_goal.shape[0]
 state_dim = depth_dim + goal_dim
 is_disc_action = len(env.action_space.shape) == 0
-running_state = ZFilter((state_dim,), clip=5)
+running_state = ZFilter((state_dim,), clip=30) # set clip to be 30 which is the maximum value for the depth value
 # running_reward = ZFilter((1,), demean=False, clip=10)
 
 """seeding"""

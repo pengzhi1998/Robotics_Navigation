@@ -115,8 +115,8 @@ class GazeboWorld():
 		self.set_self_state5.reference_frame = 'world'
 
 		#------------Params--------------------
-		high_depth = np.array([np.inf] * 24).astype(np.float32)
-		high_goal = np.array([np.inf] * 24).astype(np.float32)
+		high_depth = np.array([np.inf] * DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * IMAGE_HIST).astype(np.float32) # check the range later
+		high_goal = np.array([np.inf] * 2 * IMAGE_HIST).astype(np.float32)
 		self.action_space = spaces.Box(
 			np.array([-np.pi/6]).astype(np.float32),
 			np.array([np.pi/6]).astype(np.float32),

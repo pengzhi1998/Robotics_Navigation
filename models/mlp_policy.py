@@ -7,65 +7,51 @@ class Policy(nn.Module):
     def __init__(self, state_dim, action_dim, hidden_size=(128, 128), activation='tanh', log_std=0):
         super(Policy, self).__init__()
         self.is_disc_action = False
-        if activation == 'tanh':
-            self.activation = torch.tanh
-        elif activation == 'relu':
-            self.activation = torch.relu
-        elif activation == 'sigmoid':
-            self.activation = torch.sigmoid
 
-        self.affine_layers = nn.ModuleList()
-        last_dim = state_dim
-        for nh in hidden_size:
-            self.affine_layers.append(nn.Linear(last_dim, nh))
-            last_dim = nh
+        """ layers for inputs of depth_images """
+        self.conv1 = nn.Conv2d(4, 32, (10, 14), (8, 8), padding=(1, 4))
+        self.conv2 = nn.Conv2d(32, 64, (4, 4), 2, padding=(1, 1))
+        self.conv3 = nn.Conv2d(64, 64, (3, 3), 1, padding=(1, 1))
+        self.fc_img = nn.Linear(8 * 10 * 64, 512)
 
-        self.action_mean = nn.Linear(last_dim, action_dim)
-        self.action_mean.weight.data.mul_(0.1)
-        self.action_mean.bias.data.mul_(0.0)
+        """ layers for inputs of goals """
+        self.fc_goal = nn.Linear(4 * 2, 64)
+
+        """ layers for inputs concatenated information """
+        self.img_goal1 = nn.Linear(576, 512)
+        self.img_goal2 = nn.Linear(512, action_dim) # two dimensions of actions: upward and downward; turning
+
+        self.relu = nn.ReLU()
+        self.img_goal2.weight.data.mul_(0.1)
+        self.img_goal2.bias.data.mul_(0.0)
 
         self.action_log_std = nn.Parameter(torch.ones(1, action_dim) * log_std)
 
-    def forward(self, x):
-        for affine in self.affine_layers:
-            x = self.activation(affine(x))
+    def forward(self, depth_img, goal): # remember to initialize
+        # batch_size = x.size(0)
+        depth_img = self.relu(self.conv1(depth_img))
+        depth_img = self.relu(self.conv2(depth_img))
+        depth_img = self.relu(self.conv3(depth_img))
+        depth_img = depth_img.view(depth_img.size(0), -1)
+        depth_img = self.relu(self.fc_img(depth_img))
 
-        action_mean = self.action_mean(x)
+        goal = goal.view(goal.size(0), -1)
+        goal = self.relu(self.fc_goal(goal))
+
+        img_goal = torch.cat((depth_img, goal), 1)
+        img_goal = self.relu(self.img_goal1(img_goal))
+        action_mean = self.relu(self.img_goal2(img_goal))
+
         action_log_std = self.action_log_std.expand_as(action_mean)
         action_std = torch.exp(action_log_std)
 
         return action_mean, action_log_std, action_std
 
-    def select_action(self, x):
-        action_mean, _, action_std = self.forward(x)
+    def select_action(self, depth_img, goal):
+        action_mean, _, action_std = self.forward(depth_img, goal)
         action = torch.normal(action_mean, action_std)
         return action
 
-    def get_kl(self, x):
-        mean1, log_std1, std1 = self.forward(x)
-
-        mean0 = mean1.detach()
-        log_std0 = log_std1.detach()
-        std0 = std1.detach()
-        kl = log_std1 - log_std0 + (std0.pow(2) + (mean0 - mean1).pow(2)) / (2.0 * std1.pow(2)) - 0.5
-        return kl.sum(1, keepdim=True)
-
-    def get_log_prob(self, x, actions):
-        action_mean, action_log_std, action_std = self.forward(x)
+    def get_log_prob(self, depth_img, goal, actions):
+        action_mean, action_log_std, action_std = self.forward(depth_img, goal)
         return normal_log_density(actions, action_mean, action_log_std, action_std)
-
-    def get_fim(self, x):
-        mean, _, _ = self.forward(x)
-        cov_inv = self.action_log_std.exp().pow(-2).squeeze(0).repeat(x.size(0))
-        param_count = 0
-        std_index = 0
-        id = 0
-        for name, param in self.named_parameters():
-            if name == "action_log_std":
-                std_id = id
-                std_index = param_count
-            param_count += param.view(-1).shape[0]
-            id += 1
-        return cov_inv.detach(), mean, {'std_id': std_id, 'std_index': std_index}
-
-
