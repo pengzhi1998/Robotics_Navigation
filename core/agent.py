@@ -27,40 +27,42 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     num_episodes = 0
 
     while num_steps < min_batch_size:
-        state = env.reset()
+        img_depth, goal = env.reset()
         if running_state is not None:
-            state = running_state(state)
+            img_depth, goal = running_state(img_depth, goal)
         reward_episode = 0
 
         for t in range(10000):
-            state_var = tensor(state).unsqueeze(0)
+            img_depth_var = tensor(img_depth).unsqueeze(0)
+            goal_var = tensor(goal).unsqueeze(0)
             with torch.no_grad():
                 if mean_action:
-                    action = policy(state_var)[0][0].numpy()
+                    action = policy(img_depth_var, goal_var)[0][0].numpy()
                 else:
-                    action = policy.select_action(state_var)[0].numpy()
+                    action = policy.select_action(img_depth_var, goal_var)[0].numpy()
             action = int(action) if policy.is_disc_action else action.astype(np.float64)
-            next_state, reward, done, _ = env.step(action)
+            next_img_depth, next_goal, reward, done, _ = env.step(action)
             reward_episode += reward
             if running_state is not None:
-                next_state = running_state(next_state)
+                next_img_depth, next_goal = running_state(next_img_depth, next_goal)
 
             if custom_reward is not None:
-                reward = custom_reward(state, action)
+                reward = custom_reward(img_depth, goal, action)
                 total_c_reward += reward
                 min_c_reward = min(min_c_reward, reward)
                 max_c_reward = max(max_c_reward, reward)
 
             mask = 0 if done else 1
 
-            memory.push(state, action, mask, next_state, reward)
+            memory.push(img_depth, goal, action, mask, next_img_depth, next_goal, reward)
 
             if render:
                 env.render()
             if done:
                 break
 
-            state = next_state
+            img_depth = next_img_depth
+            goal = next_goal
 
         # log stats
         num_steps += (t + 1)

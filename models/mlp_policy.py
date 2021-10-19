@@ -27,8 +27,7 @@ class Policy(nn.Module):
 
         self.action_log_std = nn.Parameter(torch.ones(1, action_dim) * log_std)
 
-    def forward(self, depth_img, goal): # remember to initialize
-        # batch_size = x.size(0)
+    def forward(self, depth_img, goal):
         depth_img = self.relu(self.conv1(depth_img))
         depth_img = self.relu(self.conv2(depth_img))
         depth_img = self.relu(self.conv3(depth_img))

@@ -96,19 +96,20 @@ agent = Agent(env, policy_net, device, running_state=running_state, num_threads=
 
 
 def update_params(batch, i_iter):
-    states = torch.from_numpy(np.stack(batch.state)).to(dtype).to(device)
+    imgs_depth = torch.from_numpy(np.stack(batch.img_depth)).to(dtype).to(device)
+    goals = torch.from_numpy(np.stack(batch.goal)).to(dtype).to(device)
     actions = torch.from_numpy(np.stack(batch.action)).to(dtype).to(device)
     rewards = torch.from_numpy(np.stack(batch.reward)).to(dtype).to(device)
     masks = torch.from_numpy(np.stack(batch.mask)).to(dtype).to(device)
     with torch.no_grad():
-        values = value_net(states)
-        fixed_log_probs = policy_net.get_log_prob(states, actions)
+        values = value_net(imgs_depth, goals)
+        fixed_log_probs = policy_net.get_log_prob(imgs_depth, goals, actions)
 
     """get advantage estimation from the trajectories"""
     advantages, returns = estimate_advantages(rewards, masks, values, args.gamma, args.tau, device)
 
     """perform mini-batch PPO update"""
-    optim_iter_num = int(math.ceil(states.shape[0] / optim_batch_size))
+    optim_iter_num = int(math.ceil(goals.shape[0] / optim_batch_size))
     for _ in range(optim_epochs):
         perm = np.arange(states.shape[0])
         np.random.shuffle(perm)
