@@ -15,8 +15,8 @@ class RunningStat(object):
     def push(self, img_depth, goal):
         img_depth = np.asarray(img_depth)
         goal = np.asarray(goal)
-        assert img_depth.shape == self._M_img_depth.shape
-        assert goal.shape == self._M_goal.shape
+        assert img_depth.shape == self._M_img_depth.shape and\
+               goal.shape == self._M_goal.shape
         self._n += 1
         if self._n == 1:
             self._M_img_depth[...] = img_depth

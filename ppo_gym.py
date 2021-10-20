@@ -60,12 +60,12 @@ if torch.cuda.is_available():
 
 """environment"""
 env = GazeboWorld()
-depth_dim = env.observation_space_depth.shape[0]
-print "dimension:", env.observation_space_depth.shape, env.observation_space_depth.shape[0], "\n\n\n"
-goal_dim = env.observation_space_goal.shape[0]
-state_dim = depth_dim + goal_dim
+img_depth_dim = env.observation_space_img_depth
+# print "dimension:", env.observation_space_depth.shape, env.observation_space_depth.shape[0], "\n\n\n"
+goal_dim = env.observation_space_goal
+# state_dim = depth_dim + goal_dim
 is_disc_action = len(env.action_space.shape) == 0
-running_state = ZFilter((state_dim,), clip=30) # set clip to be 30 which is the maximum value for the depth value
+running_state = ZFilter(img_depth_dim, goal_dim, clip=30) # set clip to be 30 which is the maximum value for the depth value
 # running_reward = ZFilter((1,), demean=False, clip=10)
 
 """seeding"""
@@ -76,10 +76,10 @@ env.seed(args.seed)
 """define actor and critic"""
 if args.model_path is None:
     if is_disc_action:
-        policy_net = DiscretePolicy(state_dim, env.action_space.n)
+        policy_net = DiscretePolicy(0, env.action_space.n)
     else:
-        policy_net = Policy(state_dim, env.action_space.shape[0], log_std=args.log_std)
-    value_net = Value(state_dim)
+        policy_net = Policy(0, env.action_space.shape[0], log_std=args.log_std)
+    value_net = Value(0)
 else:
     policy_net, value_net, running_state = pickle.load(open(args.model_path, "rb"))
 policy_net.to(device)

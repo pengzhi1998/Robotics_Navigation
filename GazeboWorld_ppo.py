@@ -115,16 +115,13 @@ class GazeboWorld():
 		self.set_self_state5.reference_frame = 'world'
 
 		#------------Params--------------------
-		# high_depth = np.array([np.inf] * DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * IMAGE_HIST).astype(np.float32) # check the range later
-		# high_goal = np.array([np.inf] * 2 * IMAGE_HIST).astype(np.float32)
-		# self.action_space = spaces.Box(
-		# 	np.array([-np.pi/6]).astype(np.float32),
-		# 	np.array([np.pi/6]).astype(np.float32),
-		# )
-		# self.observation_space_depth = spaces.Box(-high_depth, high_depth)
-		# self.observation_space_goal = spaces.Box(-high_goal, high_goal)
-		self.observation_space_img_depth = (DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, IMAGE_HIST)
-		self.observation_space_goal = (2, IMAGE_HIST)
+		self.twist_range = np.pi/6
+		self.action_space = spaces.Box(
+			np.array([-self.twist_range]).astype(np.float32),
+			np.array([self.twist_range]).astype(np.float32),
+		)
+		self.observation_space_img_depth = (IMAGE_HIST, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
+		self.observation_space_goal = (IMAGE_HIST, 2)
 
 		self.depth_image_size = [160, 128]
 		self.rgb_image_size = [304, 228]
@@ -444,12 +441,14 @@ class GazeboWorld():
 		# else:
 		# 	self.self_speed[1] = self.action_table[action]
 		move_cmd = Twist()
+		action = np.clip(action, -self.twist_range, self.twist_range)
 		move_cmd.linear.x = 0.25
 		move_cmd.linear.y = 0.
 		move_cmd.linear.z = 0.
 		move_cmd.angular.x = 0.
 		move_cmd.angular.y = 0.
-		move_cmd.angular.z = self.action_table[action]
+		# move_cmd.angular.z = self.action_table[action]
+		move_cmd.angular.z = action
 		self.cmd_vel.publish(move_cmd)
 
 	def shutdown(self):
@@ -526,16 +525,17 @@ class GazeboWorld():
 
 		return self.obs_depths, self.obs_goals
 
-	def step(self, t, action):
+	def step(self, action):
 		# control the robot to move for one step
+		print "action:", action, "\n\n\n"
 		self.Control(action)
 
 		# construct the observations of depth images and goal infos
 		depth = np.reshape(self.GetDepthImageObservation(), (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
 		self.obs_depths = np.append(depth, self.obs_depths[:(IMAGE_HIST - 1), :, :], axis=0)
 
-		reward, done, reset, total_evaluation, goal = self.GetRewardAndTerminate(t)
-		self.obs_goals = np.append(goal, self.goals[:(IMAGE_HIST - 1), :], axis=0)
+		reward, done, reset, total_evaluation, goal = self.GetRewardAndTerminate(0)
+		self.obs_goals = np.append(goal, self.obs_goals[:(IMAGE_HIST - 1), :], axis=0)
 
 		return self.obs_depths, self.obs_goals, reward, done, {} # in the form of arrays
 
