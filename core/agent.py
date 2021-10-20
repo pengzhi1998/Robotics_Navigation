@@ -4,11 +4,16 @@ from utils.torchpy import *
 import math
 import time
 import os
+import sys
+import signal
 os.environ["OMP_NUM_THREADS"] = "1"
 
+def signal_handler(sig, frame):
+    sys.exit(0)
 
 def collect_samples(pid, queue, env, policy, custom_reward,
                     mean_action, render, running_state, min_batch_size):
+    print pid
     if pid > 0:
         torch.manual_seed(torch.randint(0, 5000, (1,)) * pid)
         if hasattr(env, 'np_random'):
@@ -33,6 +38,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         reward_episode = 0
 
         for t in range(10000):
+            signal.signal(signal.SIGINT, signal_handler)
             img_depth_var = tensor(img_depth).unsqueeze(0)
             goal_var = tensor(goal).unsqueeze(0)
             with torch.no_grad():

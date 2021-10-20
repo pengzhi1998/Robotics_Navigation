@@ -342,10 +342,10 @@ class GazeboWorld():
 		goal = np.array([distance, angle])
 		# print("goal_position, current_position, distance, angle:{:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}".
 		# 	  format(self.goal, (self.self_position_x, self.self_position_y), goal))
-		print("goal_position, current_position, distance, angle: {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}".
-			  format(np.array(self.goal)[0], np.array(self.goal)[1],
-					 self.self_position_x, self.self_position_y,
-					 goal[0], goal[1]))
+		# print("goal_position, current_position, distance, angle: {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}".
+		# 	  format(np.array(self.goal)[0], np.array(self.goal)[1],
+		# 			 self.self_position_x, self.self_position_y,
+		# 			 goal[0], goal[1]))
 		return goal
 
 	def GetTargetState(self, name):
@@ -527,7 +527,7 @@ class GazeboWorld():
 
 	def step(self, action):
 		# control the robot to move for one step
-		print "action:", action, "\n\n\n"
+		# print "action:", action, "\n\n\n"
 		self.Control(action)
 
 		# construct the observations of depth images and goal infos
@@ -535,6 +535,7 @@ class GazeboWorld():
 		self.obs_depths = np.append(depth, self.obs_depths[:(IMAGE_HIST - 1), :, :], axis=0)
 
 		reward, done, reset, total_evaluation, goal = self.GetRewardAndTerminate(0)
+		goal = np.reshape(goal, (1, 2))
 		self.obs_goals = np.append(goal, self.obs_goals[:(IMAGE_HIST - 1), :], axis=0)
 
 		return self.obs_depths, self.obs_goals, reward, done, {} # in the form of arrays
