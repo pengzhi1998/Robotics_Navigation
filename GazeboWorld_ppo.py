@@ -115,15 +115,16 @@ class GazeboWorld():
 		self.set_self_state5.reference_frame = 'world'
 
 		#------------Params--------------------
-		high_depth = np.array([np.inf] * DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * IMAGE_HIST).astype(np.float32) # check the range later
-		high_goal = np.array([np.inf] * 2 * IMAGE_HIST).astype(np.float32)
-		self.action_space = spaces.Box(
-			np.array([-np.pi/6]).astype(np.float32),
-			np.array([np.pi/6]).astype(np.float32),
-		)
-		self.observation_space_depth = spaces.Box(-high_depth, high_depth)
-		self.observation_space_goal = spaces.Box(-high_goal, high_goal)
-
+		# high_depth = np.array([np.inf] * DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * IMAGE_HIST).astype(np.float32) # check the range later
+		# high_goal = np.array([np.inf] * 2 * IMAGE_HIST).astype(np.float32)
+		# self.action_space = spaces.Box(
+		# 	np.array([-np.pi/6]).astype(np.float32),
+		# 	np.array([np.pi/6]).astype(np.float32),
+		# )
+		# self.observation_space_depth = spaces.Box(-high_depth, high_depth)
+		# self.observation_space_goal = spaces.Box(-high_goal, high_goal)
+		self.observation_space_img_depth = (DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, IMAGE_HIST)
+		self.observation_space_goal = (2, IMAGE_HIST)
 
 		self.depth_image_size = [160, 128]
 		self.rgb_image_size = [304, 228]

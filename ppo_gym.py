@@ -35,7 +35,7 @@ parser.add_argument('--learning-rate', type=float, default=3e-4, metavar='G',
                     help='learning rate (default: 3e-4)')
 parser.add_argument('--clip-epsilon', type=float, default=0.2, metavar='N',
                     help='clipping epsilon for PPO')
-parser.add_argument('--num-threads', type=int, default=4, metavar='N',
+parser.add_argument('--num-threads', type=int, default=1, metavar='N',
                     help='number of threads for agent (default: 4)')
 parser.add_argument('--seed', type=int, default=1, metavar='N',
                     help='random seed (default: 1)')
@@ -61,6 +61,7 @@ if torch.cuda.is_available():
 """environment"""
 env = GazeboWorld()
 depth_dim = env.observation_space_depth.shape[0]
+print "dimension:", env.observation_space_depth.shape, env.observation_space_depth.shape[0], "\n\n\n"
 goal_dim = env.observation_space_goal.shape[0]
 state_dim = depth_dim + goal_dim
 is_disc_action = len(env.action_space.shape) == 0
