@@ -80,6 +80,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     log['num_steps'] = num_steps
     log['num_episodes'] = num_episodes
     log['total_reward'] = total_reward
+    print total_reward, num_episodes, "\n"
     log['avg_reward'] = total_reward / num_episodes
     log['max_reward'] = max_reward
     log['min_reward'] = min_reward
