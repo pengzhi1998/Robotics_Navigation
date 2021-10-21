@@ -303,6 +303,7 @@ class GazeboWorld():
 	def GetLaserObservation(self):
 		scan = copy.deepcopy(self.scan)
 		scan[np.isinf(scan)] = 30.
+		scan[scan<0.2] = 30.
 		return scan
 
 	def GetSelfState(self):
@@ -478,6 +479,7 @@ class GazeboWorld():
 			reward_ob = (-8.0) * ((((180. - Angle) / 135. - 1.) * 3. / 8.) + 1.)
 			terminate = True
 			reset = True
+			print "Too close to the obstacle! Distance:", Distance
 
 		# compute the reward for approaching the goal
 		reward_goal = (-np.abs(goal[1]) + np.pi/3) /10
@@ -489,7 +491,7 @@ class GazeboWorld():
 			reward_reach_g = 5. * np.cos(goal[1]) + 1
 			terminate = True
 			reset = True
-			print "Reach the goal!!!"
+			print "Reached the goal!"
 
 		if t > 500:
 			reset = True

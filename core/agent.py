@@ -13,7 +13,6 @@ def signal_handler(sig, frame):
 
 def collect_samples(pid, queue, env, policy, custom_reward,
                     mean_action, render, running_state, min_batch_size):
-    print "A new iteration\n"
     if pid > 0:
         torch.manual_seed(torch.randint(0, 5000, (1,)) * pid)
         if hasattr(env, 'np_random'):
@@ -31,6 +30,8 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     max_c_reward = -1e6
     num_episodes = 0
 
+    print time.time()
+
     while num_steps < min_batch_size:
         img_depth, goal = env.reset()
         if running_state is not None:
@@ -38,6 +39,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         reward_episode = 0
 
         for t in range(10000):
+            print t
             signal.signal(signal.SIGINT, signal_handler)
             img_depth_var = tensor(img_depth).unsqueeze(0)
             goal_var = tensor(goal).unsqueeze(0)
@@ -77,10 +79,11 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         min_reward = min(min_reward, reward_episode)
         max_reward = max(max_reward, reward_episode)
 
+    print time.time()
+
     log['num_steps'] = num_steps
     log['num_episodes'] = num_episodes
     log['total_reward'] = total_reward
-    print total_reward, num_episodes, "\n"
     log['avg_reward'] = total_reward / num_episodes
     log['max_reward'] = max_reward
     log['min_reward'] = min_reward
