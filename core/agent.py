@@ -13,7 +13,7 @@ def signal_handler(sig, frame):
 
 def collect_samples(pid, queue, env, policy, custom_reward,
                     mean_action, render, running_state, min_batch_size):
-    print pid
+    print "A new iteration\n"
     if pid > 0:
         torch.manual_seed(torch.randint(0, 5000, (1,)) * pid)
         if hasattr(env, 'np_random'):

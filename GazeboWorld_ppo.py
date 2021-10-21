@@ -485,7 +485,7 @@ class GazeboWorld():
 			reward_goal = reward_goal * (Distance - 0.6) / 0.6
 
 		# compute the reward for finding the goal
-		if goal[0] < 0.2:
+		if goal[0] < 0.3:
 			reward_reach_g = 5. * np.cos(goal[1]) + 1
 			terminate = True
 			reset = True

@@ -112,20 +112,20 @@ def update_params(batch, i_iter):
     """perform mini-batch PPO update"""
     optim_iter_num = int(math.ceil(goals.shape[0] / optim_batch_size))
     for _ in range(optim_epochs):
-        perm = np.arange(states.shape[0])
+        perm = np.arange(imgs_depth.shape[0])
         np.random.shuffle(perm)
         perm = LongTensor(perm).to(device)
 
-        states, actions, returns, advantages, fixed_log_probs = \
-            states[perm].clone(), actions[perm].clone(), returns[perm].clone(), advantages[perm].clone(), fixed_log_probs[perm].clone()
+        imgs_depth, goals, actions, returns, advantages, fixed_log_probs = \
+            imgs_depth[perm].clone(), goals[perm].clone(), actions[perm].clone(), returns[perm].clone(), advantages[perm].clone(), fixed_log_probs[perm].clone()
 
         for i in range(optim_iter_num):
-            ind = slice(i * optim_batch_size, min((i + 1) * optim_batch_size, states.shape[0]))
-            states_b, actions_b, advantages_b, returns_b, fixed_log_probs_b = \
-                states[ind], actions[ind], advantages[ind], returns[ind], fixed_log_probs[ind]
+            ind = slice(i * optim_batch_size, min((i + 1) * optim_batch_size, imgs_depth.shape[0]))
+            imgs_depth_b, goals_b, actions_b, advantages_b, returns_b, fixed_log_probs_b = \
+                imgs_depth[ind], goals[ind], actions[ind], advantages[ind], returns[ind], fixed_log_probs[ind]
 
-            ppo_step(policy_net, value_net, optimizer_policy, optimizer_value, 1, states_b, actions_b, returns_b,
-                     advantages_b, fixed_log_probs_b, args.clip_epsilon, args.l2_reg)
+            ppo_step(policy_net, value_net, optimizer_policy, optimizer_value, 1, imgs_depth_b, goals_b,
+                     actions_b, returns_b, advantages_b, fixed_log_probs_b, args.clip_epsilon, args.l2_reg)
 
 
 def main_loop():
