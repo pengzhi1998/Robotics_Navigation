@@ -20,10 +20,13 @@ it instead.
 
 * In another terminal, run the code:
         
-         $ python DDDQN.py 
-         
-(4) After training, you could use `DDDQN_test.py`
+        $ export OMP_NUM_THREADS=1
+        $ python ppo_gym.py --save-model-interval 5 --env-name navigation --eval-batch-size 0 --min-batch-size 2048
+
+(4) In the directory of assets, you would find the trained model and the log file.      
+<!--      
+ (4) After training, you could use `DDDQN_test.py`
 and `DDDQN_uwsim.py` to test the performance in Gazebo
 worlds and UWSim worlds respectively. For real-world
 tests, refer to [this](https://github.com/pengzhi1998/underwater_navigation_test)
- repository.
+ repository.-->
