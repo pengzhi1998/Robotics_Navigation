@@ -487,7 +487,7 @@ class GazeboWorld():
 			reward_goal = reward_goal * (Distance - 0.6) / 0.6
 
 		# compute the reward for finding the goal
-		if goal[0] < 0.3:
+		if goal[0] < 0.4:
 			reward_reach_g = 5. * np.cos(goal[1]) + 1
 			terminate = True
 			reset = True
@@ -495,7 +495,7 @@ class GazeboWorld():
 
 		if t > 500:
 			reset = True
-			print "Didn't reach the goal"
+			print "Didn't reach the goal within a given time"
 
 		reward = reward_reach_g + reward_goal + reward_ob
 
@@ -507,6 +507,8 @@ class GazeboWorld():
 		# self.total_evaluation = self.total_evaluation + evaluation_index
 		self.total_evaluation = self.total_evaluation + reward
 		total_evaluation = self.total_evaluation
+
+		# print "reward_goal:", reward_goal, "reward:", reward
 
 		return reward, terminate, reset, total_evaluation, goal
 
@@ -527,7 +529,7 @@ class GazeboWorld():
 
 		return self.obs_depths, self.obs_goals
 
-	def step(self, action):
+	def step(self, action, t):
 		# control the robot to move for one step
 		# print "action:", action, "\n\n\n"
 		self.Control(action)
@@ -536,11 +538,11 @@ class GazeboWorld():
 		depth = np.reshape(self.GetDepthImageObservation(), (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
 		self.obs_depths = np.append(depth, self.obs_depths[:(IMAGE_HIST - 1), :, :], axis=0)
 
-		reward, done, reset, total_evaluation, goal = self.GetRewardAndTerminate(0)
+		reward, done, reset, total_evaluation, goal = self.GetRewardAndTerminate(t)
 		goal = np.reshape(goal, (1, 2))
 		self.obs_goals = np.append(goal, self.obs_goals[:(IMAGE_HIST - 1), :], axis=0)
 
-		return self.obs_depths, self.obs_goals, reward, done, {} # in the form of arrays
+		return self.obs_depths, self.obs_goals, reward, reset, {} # in the form of arrays
 
 
 

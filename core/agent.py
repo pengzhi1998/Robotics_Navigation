@@ -39,7 +39,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         reward_episode = 0
 
         for t in range(10000):
-            print t
+            # print t
             signal.signal(signal.SIGINT, signal_handler)
             img_depth_var = tensor(img_depth).unsqueeze(0)
             goal_var = tensor(goal).unsqueeze(0)
@@ -49,7 +49,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
                 else:
                     action = policy.select_action(img_depth_var, goal_var)[0].numpy()
             action = int(action) if policy.is_disc_action else action.astype(np.float64)
-            next_img_depth, next_goal, reward, done, _ = env.step(action)
+            next_img_depth, next_goal, reward, done, _ = env.step(action, t)
             reward_episode += reward
             if running_state is not None:
                 next_img_depth, next_goal = running_state(next_img_depth, next_goal)
@@ -76,6 +76,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         num_steps += (t + 1)
         num_episodes += 1
         total_reward += reward_episode
+        print "reward for one episode", reward_episode
         min_reward = min(min_reward, reward_episode)
         max_reward = max(max_reward, reward_episode)
 

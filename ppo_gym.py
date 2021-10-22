@@ -1,10 +1,8 @@
 import argparse
-import gym
 import os
 import sys
 import pickle
 import time
-import rospy
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from utils import *
@@ -148,6 +146,12 @@ def main_loop():
                 print(
                 '{}\tT_sample {:.4f}\tT_update {:.4f}\tT_eval {:.4f}\ttrain_R_min {:.2f}\ttrain_R_max {:.2f}\ttrain_R_avg {:.2f}\t'.format(
                     i_iter, log['sample_time'], t1 - t0, t2 - t1, log['min_reward'], log['max_reward'], log['avg_reward']))
+
+        my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo.txt'.format(args.env_name)), "a")
+        data = [str(i_iter), " ", str(log['avg_reward']), "\n"]
+        for element in data:
+            my_open.write(element)
+        my_open.close()
 
         if args.save_model_interval > 0 and (i_iter+1) % args.save_model_interval == 0:
             to_device(torch.device('cpu'), policy_net, value_net)
