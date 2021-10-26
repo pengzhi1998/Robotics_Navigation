@@ -29,8 +29,8 @@ parser.add_argument('--tau', type=float, default=0.95, metavar='G',
                     help='gae (default: 0.95)')
 parser.add_argument('--l2-reg', type=float, default=1e-3, metavar='G',
                     help='l2 regularization regression (default: 1e-3)')
-parser.add_argument('--learning-rate', type=float, default=3e-4, metavar='G',
-                    help='learning rate (default: 3e-4)')
+parser.add_argument('--learning-rate', type=float, default=3e-5, metavar='G',
+                    help='learning rate (default: 3e-5)')
 parser.add_argument('--clip-epsilon', type=float, default=0.2, metavar='N',
                     help='clipping epsilon for PPO')
 parser.add_argument('--num-threads', type=int, default=1, metavar='N',
@@ -59,7 +59,7 @@ if torch.cuda.is_available():
 """environment"""
 env = GazeboWorld()
 img_depth_dim = env.observation_space_img_depth
-# print "dimension:", env.observation_space_depth.shape, env.observation_space_depth.shape[0], "\n\n\n"
+# print "dimension:", env.observation_space_img_depth, "\n\n\n"
 goal_dim = env.observation_space_goal
 # state_dim = depth_dim + goal_dim
 is_disc_action = len(env.action_space.shape) == 0
@@ -108,7 +108,7 @@ def update_params(batch, i_iter):
     advantages, returns = estimate_advantages(rewards, masks, values, args.gamma, args.tau, device)
 
     """perform mini-batch PPO update"""
-    optim_iter_num = int(math.ceil(goals.shape[0] / optim_batch_size))
+    optim_iter_num = int(math.ceil(imgs_depth.shape[0] / optim_batch_size))
     for _ in range(optim_epochs):
         perm = np.arange(imgs_depth.shape[0])
         np.random.shuffle(perm)

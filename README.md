@@ -10,7 +10,10 @@ Ubuntu 18.04, ROS Melodic, python 2.7.17, cuda 10.1, 10.0, torch 1.4.0
 we were using a Turtlebot to train the policy.
 For next step, we'll use UUVSimulator to train 
 it instead.
-* Place the designed world `empty.world` into the worlds directory.
+* Copy the designed world `empty.world`
+ and launch file `turtlebot3_empty_world.launch` from 
+ `assest/Training_environments` into the worlds directory
+ and launch file directory respectively.
 * Install the dependencies for training.
 
 (3) Run the code

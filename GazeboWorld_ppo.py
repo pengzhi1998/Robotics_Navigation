@@ -130,9 +130,6 @@ class GazeboWorld():
 		self.object_state = [0, 0, 0, 0]
 		self.object_name = []
 
-		# 0. | left 90/s | left 45/s | right 45/s | right 90/s | acc 1/s | slow down -1/s
-		self.action_table = [np.pi/6, np.pi/12, 0., -np.pi/12, -np.pi/6]
-
 		self.self_speed = [.2, 0.0]
 		self.default_states = None
 
@@ -442,7 +439,9 @@ class GazeboWorld():
 		# else:
 		# 	self.self_speed[1] = self.action_table[action]
 		move_cmd = Twist()
-		action = np.clip(action, -self.twist_range, self.twist_range)
+		action = np.clip(action, -1, 1)
+		action = action * self.twist_range
+		# print "action:", action, "\n\n\n"
 		move_cmd.linear.x = 0.25
 		move_cmd.linear.y = 0.
 		move_cmd.linear.z = 0.
@@ -487,7 +486,7 @@ class GazeboWorld():
 			reward_goal = reward_goal * (Distance - 0.6) / 0.6
 
 		# compute the reward for finding the goal
-		if goal[0] < 0.4:
+		if goal[0] < .4:
 			reward_reach_g = 5. * np.cos(goal[1]) + 1
 			terminate = True
 			reset = True
@@ -531,7 +530,7 @@ class GazeboWorld():
 
 	def step(self, action, t):
 		# control the robot to move for one step
-		# print "action:", action, "\n\n\n"
+		# print "action:", t, action, "\n\n\n"
 		self.Control(action)
 
 		# construct the observations of depth images and goal infos

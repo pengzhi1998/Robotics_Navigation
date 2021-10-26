@@ -35,7 +35,11 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     while num_steps < min_batch_size:
         img_depth, goal = env.reset()
         if running_state is not None:
+            # print "before", img_depth.shape, goal.shape, img_depth.dtype
             img_depth, goal = running_state(img_depth, goal)
+            # print "after", img_depth.shape, goal.shape, img_depth.dtype
+        else:
+            img_depth, goal = img_depth.astype(np.float64), goal.astype(np.float64)
         reward_episode = 0
 
         for t in range(10000):
@@ -52,7 +56,12 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             next_img_depth, next_goal, reward, done, _ = env.step(action, t)
             reward_episode += reward
             if running_state is not None:
+                # print "before", next_img_depth.shape, next_goal.shape
                 next_img_depth, next_goal = running_state(next_img_depth, next_goal)
+                # print "after", next_img_depth.shape, next_goal.shape
+            else:
+                next_img_depth, next_goal = next_img_depth.astype(np.float64),\
+                                            next_goal.astype(np.float64)
 
             if custom_reward is not None:
                 reward = custom_reward(img_depth, goal, action)
@@ -74,6 +83,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
 
         # log stats
         num_steps += (t + 1)
+        # print "num_steps:", num_steps
         num_episodes += 1
         total_reward += reward_episode
         print "reward for one episode", reward_episode
@@ -143,6 +153,7 @@ class Agent:
 
         memory, log = collect_samples(0, None, self.env, self.policy, self.custom_reward, mean_action,
                                       render, self.running_state, thread_batch_size)
+                                      # render, None, thread_batch_size)
 
         worker_logs = [None] * len(workers)
         worker_memories = [None] * len(workers)
