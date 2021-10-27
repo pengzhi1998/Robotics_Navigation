@@ -48,7 +48,7 @@ class Policy(nn.Module):
 
     def select_action(self, depth_img, goal):
         action_mean, _, action_std = self.forward(depth_img, goal)
-        print "action:", action_mean, action_std
+        # print "action:", action_mean, action_std
         action = torch.normal(action_mean, action_std)
         # print action, "\n\n\n"
         return action

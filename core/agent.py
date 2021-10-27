@@ -36,7 +36,10 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         img_depth, goal = env.reset()
         if running_state is not None:
             # print "before", img_depth.shape, goal.shape, img_depth.dtype
-            img_depth, goal = running_state(img_depth, goal)
+            # print "first_depth_before:", np.max(img_depth), "first_goal_before:", np.max(goal)
+            _, goal = running_state(img_depth, goal)
+            img_depth = np.float64((img_depth - 2.5) / 2.5)
+            # print "first_depth_after:", np.max(img_depth), "first_goal_after:", np.max(goal)
             # print "after", img_depth.shape, goal.shape, img_depth.dtype
         else:
             img_depth, goal = img_depth.astype(np.float64), goal.astype(np.float64)
@@ -57,7 +60,11 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             reward_episode += reward
             if running_state is not None:
                 # print "before", next_img_depth.shape, next_goal.shape
-                next_img_depth, next_goal = running_state(next_img_depth, next_goal)
+                # print "depth_before:", np.max(next_img_depth), np.min(next_img_depth), "goal_before:", np.max(next_goal), np.min(goal)
+                _, next_goal = running_state(next_img_depth, next_goal)
+                next_img_depth = np.float64((next_img_depth - 2.5) / 2.5)
+                # print next_img_depth
+                # print "depth_after:", np.max(next_img_depth), np.min(next_img_depth), "goal_after:", np.max(next_goal), np.min(goal), "\n\n\n"
                 # print "after", next_img_depth.shape, next_goal.shape
             else:
                 next_img_depth, next_goal = next_img_depth.astype(np.float64),\

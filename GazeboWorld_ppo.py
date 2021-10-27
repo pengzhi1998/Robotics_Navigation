@@ -244,6 +244,7 @@ class GazeboWorld():
 		cv_img = cv2.resize(cv_img, dim, interpolation = cv2.INTER_AREA)
 
 		cv_img[np.isnan(cv_img)] = 0.
+		# print "max_value:", np.max(cv_img), "\n\n"
 		cv_img[cv_img < 0.4] = 0.
 		# cv_img/=(10./255.)
 
@@ -256,7 +257,8 @@ class GazeboWorld():
 		gauss = gauss.reshape(dim[1], dim[0])
 		cv_img = np.array(cv_img, dtype=np.float32)
 		cv_img = cv_img + gauss
-		cv_img[cv_img<0.4] = 0.
+		cv_img[cv_img<0.2] = 0.
+		cv_img[cv_img>5.0] = 5.0
 
 		cv_img = np.array(cv_img, dtype=np.float32)
 		# cv_img*=(10./255.)
@@ -540,6 +542,10 @@ class GazeboWorld():
 		reward, done, reset, total_evaluation, goal = self.GetRewardAndTerminate(t)
 		goal = np.reshape(goal, (1, 2))
 		self.obs_goals = np.append(goal, self.obs_goals[:(IMAGE_HIST - 1), :], axis=0)
+
+		# print "max obs_depths and obs_goals:", np.max(self.obs_depths), np.max(self.obs_goals)
+
+		# print self.obs_depths[0][0][0], self.obs_depths[1][0][0], self.obs_depths[2][0][0], self.obs_depths[3][0][0]
 
 		return self.obs_depths, self.obs_goals, reward, reset, {} # in the form of arrays
 
