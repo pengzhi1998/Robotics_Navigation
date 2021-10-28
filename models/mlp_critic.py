@@ -19,6 +19,7 @@ class Value(nn.Module):
         self.img_goal2 = nn.Linear(512, 1)  # two dimensions of actions: upward and downward; turning
 
         self.relu = nn.ReLU()
+        self.tanh = nn.Tanh()
         self.img_goal2.weight.data.mul_(1)
         self.img_goal2.bias.data.mul_(0.0)
 
@@ -34,6 +35,6 @@ class Value(nn.Module):
 
         img_goal = torch.cat((depth_img, goal), 1)
         img_goal = self.relu(self.img_goal1(img_goal))
-        value = self.relu(self.img_goal2(img_goal))
+        value = self.tanh(self.img_goal2(img_goal))
 
         return value
