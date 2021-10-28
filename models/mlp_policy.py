@@ -22,7 +22,7 @@ class Policy(nn.Module):
         self.img_goal2 = nn.Linear(512, action_dim) # two dimensions of actions: upward and downward; turning
 
         self.relu = nn.ReLU()
-        self.img_goal2.weight.data.mul_(0.1)
+        self.img_goal2.weight.data.mul_(1)
         self.img_goal2.bias.data.mul_(0.0)
 
         self.action_log_std = nn.Parameter(torch.ones(1, action_dim) * log_std)
@@ -49,7 +49,7 @@ class Policy(nn.Module):
     def select_action(self, depth_img, goal):
         action_mean, _, action_std = self.forward(depth_img, goal)
         # print "action:", action_mean, action_std
-        action = torch.normal(action_mean, action_std)
+        action = torch.clamp(torch.normal(action_mean, action_std), -1, 1)
         # print action, "\n\n\n"
         return action
 

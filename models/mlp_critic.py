@@ -19,7 +19,7 @@ class Value(nn.Module):
         self.img_goal2 = nn.Linear(512, 1)  # two dimensions of actions: upward and downward; turning
 
         self.relu = nn.ReLU()
-        self.img_goal2.weight.data.mul_(0.1)
+        self.img_goal2.weight.data.mul_(1)
         self.img_goal2.bias.data.mul_(0.0)
 
     def forward(self, depth_img, goal):

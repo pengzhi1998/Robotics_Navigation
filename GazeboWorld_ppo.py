@@ -441,7 +441,7 @@ class GazeboWorld():
 		# else:
 		# 	self.self_speed[1] = self.action_table[action]
 		move_cmd = Twist()
-		action = np.clip(action, -1, 1)
+		# action = np.clip(action, -1, 1)
 		action = action * self.twist_range
 		# print "action:", action, "\n\n\n"
 		move_cmd.linear.x = 0.25
