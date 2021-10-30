@@ -3,7 +3,7 @@ import torch
 
 
 class Value(nn.Module):
-    def __init__(self, state_dim, hidden_size=(128, 128), activation='tanh'):
+    def __init__(self):
         super(Value, self).__init__()
         """ layers for inputs of depth_images """
         self.conv1 = nn.Conv2d(4, 32, (10, 14), (8, 8), padding=(1, 4))

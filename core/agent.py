@@ -22,6 +22,9 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     log = dict()
     memory = Memory()
     num_steps = 0
+    num_episodes = 0
+    num_episodes_success = 0
+    num_steps_episodes = 0
     total_reward = 0
     min_reward = 1e6
     max_reward = -1e6
@@ -83,6 +86,10 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             if render:
                 env.render()
             if done:
+                num_episodes += 1
+                if reward > 0:
+                    num_episodes_success += 1
+                    num_steps_episodes += t
                 break
 
             img_depth = next_img_depth
@@ -105,6 +112,13 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     log['avg_reward'] = total_reward / num_episodes
     log['max_reward'] = max_reward
     log['min_reward'] = min_reward
+    log['num_episodes'] = num_episodes
+    log['ratio_success'] = num_episodes_success / num_episodes
+    if num_episodes_success != 0:
+        log['avg_steps_success'] = num_steps_episodes / num_episodes_success
+    else:
+        log['avg_steps_success'] = 0
+
     if custom_reward is not None:
         log['total_c_reward'] = total_c_reward
         log['avg_c_reward'] = total_c_reward / num_steps

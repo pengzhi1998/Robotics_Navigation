@@ -76,8 +76,8 @@ if args.model_path is None:
     if is_disc_action:
         policy_net = DiscretePolicy(0, env.action_space.n)
     else:
-        policy_net = Policy(0, env.action_space.shape[0], log_std=args.log_std)
-    value_net = Value(0)
+        policy_net = Policy(env.action_space.shape[0], log_std=args.log_std)
+    value_net = Value()
 else:
     policy_net, value_net, running_state = pickle.load(open(args.model_path, "rb"))
 policy_net.to(device)
@@ -148,7 +148,8 @@ def main_loop():
                     i_iter, log['sample_time'], t1 - t0, t2 - t1, log['min_reward'], log['max_reward'], log['avg_reward']))
 
         my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo.txt'.format(args.env_name)), "a")
-        data = [str(i_iter), " ", str(log['avg_reward']), "\n"]
+        data = [str(i_iter), " ", str(log['avg_reward']), " ", str(log['num_episodes']),
+                " ", str(log['ratio_success']), " ", str(log['avg_steps_success']), "\n"]
         for element in data:
             my_open.write(element)
         my_open.close()
