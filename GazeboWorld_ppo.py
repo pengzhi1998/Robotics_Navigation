@@ -31,8 +31,8 @@ class GazeboWorld():
 		# initialization states
 		self.set_self_state1 = ModelState()
 		self.set_self_state1.model_name = 'turtlebot3_waffle'
-		self.set_self_state1.pose.position.x = 6.5 + np.random.uniform(-0.05, 0.05)
-		self.set_self_state1.pose.position.y = -2. + np.random.uniform(-0.1, 0.1)
+		self.set_self_state1.pose.position.x = 6.5
+		self.set_self_state1.pose.position.y = -2.
 		self.set_self_state1.pose.position.z = 0.0
 		self.set_self_state1.pose.orientation.x = 0.0
 		self.set_self_state1.pose.orientation.y = 0.0
@@ -48,8 +48,8 @@ class GazeboWorld():
 
 		self.set_self_state2 = ModelState()
 		self.set_self_state2.model_name = 'turtlebot3_waffle'
-		self.set_self_state2.pose.position.x = -6.5 + np.random.uniform(-0.05, 0.05)
-		self.set_self_state2.pose.position.y = -2. + np.random.uniform(-0.1, 0.1)
+		self.set_self_state2.pose.position.x = -6.5
+		self.set_self_state2.pose.position.y = -2.
 		self.set_self_state2.pose.position.z = 0.0
 		self.set_self_state2.pose.orientation.x = 0.0
 		self.set_self_state2.pose.orientation.y = 0.0
@@ -65,8 +65,8 @@ class GazeboWorld():
 
 		self.set_self_state3 = ModelState()
 		self.set_self_state3.model_name = 'turtlebot3_waffle'
-		self.set_self_state3.pose.position.x = -2.5 + np.random.uniform(-0.1, 0.1)
-		self.set_self_state3.pose.position.y = -2. + np.random.uniform(-0.1, 0.1)
+		self.set_self_state3.pose.position.x = -2.5
+		self.set_self_state3.pose.position.y = -2.
 		self.set_self_state3.pose.position.z = 0.0
 		self.set_self_state3.pose.orientation.x = 0.0
 		self.set_self_state3.pose.orientation.y = 0.0
@@ -82,8 +82,8 @@ class GazeboWorld():
 
 		self.set_self_state4 = ModelState()
 		self.set_self_state4.model_name = 'turtlebot3_waffle'
-		self.set_self_state4.pose.position.x = 2.5 + np.random.uniform(-0.1, 0.1)
-		self.set_self_state4.pose.position.y = -2. + np.random.uniform(-0.1, 0.1)
+		self.set_self_state4.pose.position.x = 2.5
+		self.set_self_state4.pose.position.y = -2.
 		self.set_self_state4.pose.position.z = 0.0
 		self.set_self_state4.pose.orientation.x = 0.0
 		self.set_self_state4.pose.orientation.y = 0.0
@@ -99,8 +99,8 @@ class GazeboWorld():
 
 		self.set_self_state5 = ModelState()
 		self.set_self_state5.model_name = 'turtlebot3_waffle'
-		self.set_self_state5.pose.position.x = 0. + np.random.uniform(-0.1, 0.1)
-		self.set_self_state5.pose.position.y = 7. + np.random.uniform(-0.1, 0.1)
+		self.set_self_state5.pose.position.x = 0.
+		self.set_self_state5.pose.position.y = 7.
 		self.set_self_state5.pose.position.z = 0.0
 		self.set_self_state5.pose.orientation.x = 0.0
 		self.set_self_state5.pose.orientation.y = 0.0
@@ -360,45 +360,46 @@ class GazeboWorld():
 	def SetObjectPose(self, name='mobile_base', random_flag=False):
 		if name is 'mobile_base' :
 			rand = random.random()
-			# object_state = copy.deepcopy(self.set_self_state)
-			# quaternion = tf.transformations.quaternion_from_euler(0., 0., np.random.uniform(-np.pi, np.pi))
+			# print "rand:", rand
 			if rand < 0.2:
 				object_state = copy.deepcopy(self.set_self_state1)
-				quaternion = tf.transformations.quaternion_from_euler(0., 0., np.pi/2 + np.random.uniform(-np.pi/6, np.pi/6))
-				self.goal = (np.random.uniform(-1, 1), 11 + np.random.uniform(-0.4, 0.4)) # set a goal respectively
+				quaternion = tf.transformations.quaternion_from_euler(0., 0., np.pi/2 + random.uniform(-np.pi/6, np.pi/6))
+				self.goal = (random.uniform(-1, 1), 11 + random.uniform(-0.4, 0.4)) # set a goal respectively
 
 			elif rand < 0.4:
 				object_state = copy.deepcopy(self.set_self_state2)
-				quaternion = tf.transformations.quaternion_from_euler(0., 0., np.pi/2 + np.random.uniform(-np.pi/6, np.pi/6))
-				self.goal = (np.random.uniform(-1, 1), 11 + np.random.uniform(-0.4, 0.4))
+				quaternion = tf.transformations.quaternion_from_euler(0., 0., np.pi/2 + random.uniform(-np.pi/6, np.pi/6))
+				self.goal = (random.uniform(-1, 1), 11 + random.uniform(-0.4, 0.4))
 
 			elif rand < 0.6:
 				object_state = copy.deepcopy(self.set_self_state3)
-				quaternion = tf.transformations.quaternion_from_euler(0., 0., np.random.uniform(-np.pi/4, 3*np.pi/4))
+				quaternion = tf.transformations.quaternion_from_euler(0., 0., random.uniform(-np.pi/4, 3*np.pi/4))
 				if random.random() < 0.5:
-					self.goal = (-1.5 + np.random.uniform(-0.5, 0.5), 6.5 + np.random.uniform(-0.5, 0.5))
+					self.goal = (-1.5 + random.uniform(-0.5, 0.5), 6.5 + random.uniform(-0.5, 0.5))
 				else:
-					self.goal = (1.5 + np.random.uniform(-0.5, 0.5), 6.5 + np.random.uniform(-0.5, 0.5))
+					self.goal = (1.5 + random.uniform(-0.5, 0.5), 6.5 + random.uniform(-0.5, 0.5))
 
 			elif rand < 0.8:
-				random_angle = np.random.choice([np.random.uniform(-np.pi, -3*np.pi/4),
-												 np.random.uniform(np.pi/4, np.pi/2),
-												 np.random.uniform(np.pi/2, 3*np.pi/4),
-												 np.random.uniform(3*np.pi/4, np.pi)])
+				random_angle = random.choice([random.uniform(-np.pi, -3*np.pi/4),
+												 random.uniform(np.pi/4, np.pi/2),
+												 random.uniform(np.pi/2, 3*np.pi/4),
+												 random.uniform(3*np.pi/4, np.pi)])
 				object_state = copy.deepcopy(self.set_self_state4)
 				quaternion = tf.transformations.quaternion_from_euler(0., 0., random_angle)
 				if random.random() < 0.5:
-					self.goal = (-1.5 + np.random.uniform(-0.5, 0.5), 6.5 + np.random.uniform(-0.5, 0.5))
+					self.goal = (-1.5 + random.uniform(-0.5, 0.5), 6.5 + random.uniform(-0.5, 0.5))
 				else:
-					self.goal = (1.5 + np.random.uniform(-0.5, 0.5), 6.5 + np.random.uniform(-0.5, 0.5))
+					self.goal = (1.5 + random.uniform(-0.5, 0.5), 6.5 + random.uniform(-0.5, 0.5))
 
 			else:
 				object_state = copy.deepcopy(self.set_self_state5)
-				quaternion = tf.transformations.quaternion_from_euler(0., 0., np.random.uniform(-5*np.pi/6, -np.pi/6))
+				quaternion = tf.transformations.quaternion_from_euler(0., 0., random.uniform(-5*np.pi/6, -np.pi/6))
 				if random.random() < 0.5:
-					self.goal = (-2.5 + np.random.uniform(-0.1, 0.1), -2 + np.random.uniform(-0.1, 0.1))
+					self.goal = (-2.5 + random.uniform(-0.1, 0.1), -2 + random.uniform(-0.1, 0.1))
 				else:
-					self.goal = (2.5 + np.random.uniform(-0.1, 0.1), -2 + np.random.uniform(-0.1, 0.1))
+					self.goal = (2.5 + random.uniform(-0.1, 0.1), -2 + random.uniform(-0.1, 0.1))
+
+			# print quaternion, object_state.pose.position
 
 			R2G = np.array(np.array(self.goal) - np.array(
 				[object_state.pose.position.x, object_state.pose.position.y]))  # the vector of robot towarding the goal
@@ -433,6 +434,7 @@ class GazeboWorld():
 		self.step_r_cnt = 0.
 		self.start_time = time.time()
 		rospy.sleep(0.5)
+		# print "position:", self.self_position_x, self.self_position_y
 
 	def Control(self, action):
 		# if action < 2:

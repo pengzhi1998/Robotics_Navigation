@@ -149,7 +149,7 @@ def main_loop():
 
         my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo.txt'.format(args.env_name)), "a")
         data = [str(i_iter), " ", str(log['avg_reward']), " ", str(log['num_episodes']),
-                " ", str(log['ratio_success']), " ", str(log['avg_steps_success']), "\n"]
+                " ", str(log['ratio_success']), " ", str(log['avg_steps_success']), " ", str(log['avg_last_reward']), "\n"]
         for element in data:
             my_open.write(element)
         my_open.close()

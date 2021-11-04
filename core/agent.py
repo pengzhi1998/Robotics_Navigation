@@ -31,6 +31,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     min_c_reward = 1e6
     max_c_reward = -1e6
     num_episodes = 0
+    reward_done = 0
 
     print time.time()
 
@@ -85,6 +86,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             if render:
                 env.render()
             if done:
+                reward_done += reward
                 if reward > 0:
                     num_episodes_success += 1
                     num_steps_episodes += t
@@ -112,6 +114,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     log['min_reward'] = min_reward
     log['num_episodes'] = num_episodes
     log['ratio_success'] = float(num_episodes_success) / float(num_episodes)
+    log['avg_last_reward'] = reward_done / num_episodes
     if num_episodes_success != 0:
         log['avg_steps_success'] = float(num_steps_episodes) / float(num_episodes_success)
     else:
