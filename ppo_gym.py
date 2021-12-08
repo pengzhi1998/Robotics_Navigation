@@ -12,7 +12,7 @@ from models.mlp_policy_disc import DiscretePolicy
 from core.ppo import ppo_step
 from core.common import estimate_advantages
 from core.agent import Agent
-from GazeboWorld_ppo import GazeboWorld
+from unity_underwater_env import Underwater_navigation
 
 parser = argparse.ArgumentParser(description='PyTorch PPO example')
 parser.add_argument('--env-name', default="Hopper-v2", metavar='G',
@@ -57,7 +57,7 @@ if torch.cuda.is_available():
     torch.cuda.set_device(args.gpu_index)
 
 """environment"""
-env = GazeboWorld()
+env = Underwater_navigation()
 img_depth_dim = env.observation_space_img_depth
 # print "dimension:", env.observation_space_img_depth, "\n\n\n"
 goal_dim = env.observation_space_goal

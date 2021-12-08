@@ -33,7 +33,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     num_episodes = 0
     reward_done = 0
 
-    print time.time()
+    print(time.time())
 
     while num_steps < min_batch_size:
         img_depth, goal = env.reset()
@@ -100,11 +100,11 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         # print "num_steps:", num_steps
         num_episodes += 1
         total_reward += reward_episode
-        print "reward for one episode", reward_episode
+        print("reward for one episode", reward_episode)
         min_reward = min(min_reward, reward_episode)
         max_reward = max(max_reward, reward_episode)
 
-    print time.time()
+    print(time.time())
 
     log['num_steps'] = num_steps
     log['num_episodes'] = num_episodes
