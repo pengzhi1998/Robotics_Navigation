@@ -1,2 +1,3 @@
 *.pyc
 /assets/learned_models/
+/DPT/weights/
