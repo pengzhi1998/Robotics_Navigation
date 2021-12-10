@@ -109,10 +109,12 @@ def image_input(img):
         array: RGB image (0-1)
     """
 
-    if img.ndim == 2:
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    # if img.ndim == 2:
+    #     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) / 255.0
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) / 255.0
+
+    # img = img /255.0
 
     return img
 

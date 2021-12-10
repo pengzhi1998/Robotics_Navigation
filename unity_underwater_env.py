@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 import torch
 import time
 import uuid
@@ -122,32 +123,24 @@ class DPT_depth():
         self.model.to(self.device)
 
     def run(self, rgb_img):
-        # time0 = time.time()
-        img = DPT.util.io.image_input(rgb_img)
-        # time1 = time.time()
-        img_input = self.transform({"image": img})["image"]
-        # time2 = time.time()
+        img_input = self.transform({"image": rgb_img})["image"]
 
         with torch.no_grad():
             sample = torch.from_numpy(img_input).to(self.device).unsqueeze(0)
-            # time3 = time.time()
+            time3 = time.time()
             if self.optimize == True and self.device == torch.device("cuda"):
                 sample = sample.to(memory_format=torch.channels_last)
-                # time4 = time.time()
+                time4 = time.time()
                 sample = sample.half()
-                # time5 = time.time()
+                time5 = time.time()
             prediction = self.model.forward(sample)
-            # time6 = time.time()
             prediction = (
                 torch.nn.functional.interpolate(
-                    prediction,
-                    size=[1, 1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH],
+                    prediction.unsqueeze(0),
+                    size=(DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH),
                     mode="bicubic",
                     align_corners=False,
                 )
-                    # .squeeze()
-                    # .cpu()
-                    # .numpy()
             )
 
             depth_min = prediction.min()
@@ -157,11 +150,13 @@ class DPT_depth():
                 prediction = (prediction - depth_min) / (depth_max - depth_min)
             else:
                 prediction = np.zeros(prediction.shape, dtype=prediction.dtype)
-            # time7 = time.time()
 
-        # print("time:", time1 - time0, time2 - time1, time3 - time2, time6 - time3)
-        # print("time:", time1 - time0, time2 - time1, time3 - time2, time4 - time3,
-        #       time5 - time4, time6 - time5, time7 - time6)
+            # prediction_show = prediction.squeeze().cpu().numpy()
+            # print("prediction size:", np.shape(prediction_show), np.shape(prediction))
+            # plt.imshow(np.uint16(prediction_show * 65536))
+            # plt.show()
+
+            # cv2.imwrite("depth.png", ((prediction_show*65536).astype("uint16")), [cv2.IMWRITE_PNG_COMPRESSION, 0])
 
         return prediction
 
@@ -205,13 +200,6 @@ class Underwater_navigation():
 
         return [obs_img_ray[0], np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 12 * 0.8, obs_goal]
 
-        depth = self.GetDepthImageObservation()
-        self.obs_depths = np.stack((depth, depth, depth, depth), axis=0)
-
-        _, _, _, _, goal = self.GetRewardAndTerminate(0)
-        self.obs_goals = np.stack((goal, goal, goal, goal), axis=0)
-
-
     def step(self, action):
         # action[0] controls its vertical speed, action[1] controls its rotation speed
         action_ver = action[0] / 5
@@ -225,14 +213,14 @@ class Underwater_navigation():
         obs_goal = self.pos_info.goal_info()
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
-        obs_preddepth = torch.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
-        self.obs_preddepths = torch.cat((obs_preddepth, self.obs_preddepths[:(HIST - 1), :, :]), dim=1)
-
-        obs_goal = torch.reshape(torch.from_numpy(obs_goal).to(self.device), (1, DIM_GOAL))
-        self.obs_goals = torch.cat((obs_goal, self.obs_goals[:(HIST - 1), :]), dim=0)
-
-        obs_ray = torch.reshape(obs_ray, (1, 1)) # single beam sonar
-        self.obs_rays = torch.cat((obs_ray, self.obs_rays[:(HIST - 1), :]), dim=0)
+        # obs_preddepth = torch.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
+        # self.obs_preddepths = torch.cat((obs_preddepth, self.obs_preddepths[:(HIST - 1), :, :]), dim=1)
+        #
+        # obs_goal = torch.reshape(torch.from_numpy(obs_goal).to(self.device), (1, DIM_GOAL))
+        # self.obs_goals = torch.cat((obs_goal, self.obs_goals[:(HIST - 1), :]), dim=0)
+        #
+        # obs_ray = torch.reshape(obs_ray, (1, 1)) # single beam sonar
+        # self.obs_rays = torch.cat((obs_ray, self.obs_rays[:(HIST - 1), :]), dim=0)
 
         # compute reward
         # 1. give a negative reward when robot is too close to nearby obstacles
@@ -272,7 +260,9 @@ class Underwater_navigation():
         #       reward_goal_reaching, reward_turning, reward)
 
         # the observation value for ray should be scaled
-        return [self.obs_preddepths, self.obs_goals, self.obs_rays], \
+        # return [self.obs_preddepths, self.obs_goals, self.obs_rays], \
+        #        reward, done, 0
+        return 0, \
                reward, done, 0
 
 env = Underwater_navigation()
