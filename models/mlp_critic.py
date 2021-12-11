@@ -39,6 +39,6 @@ class Value(nn.Module):
 
         img_goal_ray = torch.cat((depth_img, goal, ray), 1)
         img_goal_ray = self.relu(self.img_goal_ray1(img_goal_ray))
-        value = self.tanh(self.img_goal2(img_goal_ray))
+        value = self.tanh(self.img_goal_ray2(img_goal_ray))
 
         return value

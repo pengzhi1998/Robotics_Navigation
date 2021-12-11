@@ -96,12 +96,13 @@ agent = Agent(env, policy_net, device, running_state=running_state, num_threads=
 def update_params(batch, i_iter):
     imgs_depth = torch.from_numpy(np.stack(batch.img_depth)).to(dtype).to(device)
     goals = torch.from_numpy(np.stack(batch.goal)).to(dtype).to(device)
+    rays = torch.from_numpy(np.stack(batch.ray)).to(dtype).to(device)
     actions = torch.from_numpy(np.stack(batch.action)).to(dtype).to(device)
     rewards = torch.from_numpy(np.stack(batch.reward)).to(dtype).to(device)
     masks = torch.from_numpy(np.stack(batch.mask)).to(dtype).to(device)
     with torch.no_grad():
-        values = value_net(imgs_depth, goals)
-        fixed_log_probs = policy_net.get_log_prob(imgs_depth, goals, actions)
+        values = value_net(imgs_depth, goals, rays)
+        fixed_log_probs = policy_net.get_log_prob(imgs_depth, goals, rays, actions)
 
     """get advantage estimation from the trajectories"""
     advantages, returns = estimate_advantages(rewards, masks, values, args.gamma, args.tau, device)
@@ -113,15 +114,15 @@ def update_params(batch, i_iter):
         np.random.shuffle(perm)
         perm = LongTensor(perm).to(device)
 
-        imgs_depth, goals, actions, returns, advantages, fixed_log_probs = \
-            imgs_depth[perm].clone(), goals[perm].clone(), actions[perm].clone(), returns[perm].clone(), advantages[perm].clone(), fixed_log_probs[perm].clone()
+        imgs_depth, goals, rays, actions, returns, advantages, fixed_log_probs = \
+            imgs_depth[perm].clone(), goals[perm].clone(), rays[perm].clone(), actions[perm].clone(), returns[perm].clone(), advantages[perm].clone(), fixed_log_probs[perm].clone()
 
         for i in range(optim_iter_num):
             ind = slice(i * optim_batch_size, min((i + 1) * optim_batch_size, imgs_depth.shape[0]))
-            imgs_depth_b, goals_b, actions_b, advantages_b, returns_b, fixed_log_probs_b = \
-                imgs_depth[ind], goals[ind], actions[ind], advantages[ind], returns[ind], fixed_log_probs[ind]
+            imgs_depth_b, goals_b, rays_b, actions_b, advantages_b, returns_b, fixed_log_probs_b = \
+                imgs_depth[ind], goals[ind], rays[ind], actions[ind], advantages[ind], returns[ind], fixed_log_probs[ind]
 
-            ppo_step(policy_net, value_net, optimizer_policy, optimizer_value, 1, imgs_depth_b, goals_b,
+            ppo_step(policy_net, value_net, optimizer_policy, optimizer_value, 1, imgs_depth_b, goals_b, rays_b,
                      actions_b, returns_b, advantages_b, fixed_log_probs_b, args.clip_epsilon, args.l2_reg)
 
 
