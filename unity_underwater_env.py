@@ -227,7 +227,7 @@ class Underwater_navigation():
 
         self.obs_rays = np.stack((obs_ray, obs_ray, obs_ray, obs_ray), axis=0)
 
-        return [self.obs_preddepths, self.obs_goals, self.obs_rays]
+        return self.obs_preddepths, self.obs_goals, self.obs_rays
 
     def step(self, action):
         self.time_before = time.time()
@@ -289,7 +289,7 @@ class Underwater_navigation():
         self.obs_rays = np.append(obs_ray, self.obs_rays[:(HIST - 1), :], axis=0)
         self.time_after = time.time()
         print("execution_time:", self.time_after - self.time_before)
-        return [self.obs_preddepths, self.obs_goals, self.obs_rays], reward, done, 0
+        return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 
 # env = Underwater_navigation()
 #

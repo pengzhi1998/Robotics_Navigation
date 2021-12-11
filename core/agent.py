@@ -45,7 +45,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             # print "first_depth_after:", np.max(img_depth), "first_goal_after:", np.max(goal)
             # print "after", img_depth.shape, goal.shape, img_depth.dtype
         else:
-            img_depth, goal = img_depth.astype(np.float64), goal.astype(np.float64)
+            img_depth, goal, ray = img_depth.astype(np.float64), goal.astype(np.float64), ray.astype(np.float64)
         reward_episode = 0
 
         for t in range(10000):
@@ -53,35 +53,36 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             signal.signal(signal.SIGINT, signal_handler)
             img_depth_var = tensor(img_depth).unsqueeze(0)
             goal_var = tensor(goal).unsqueeze(0)
+            ray_var = tensor(ray).unsqueeze(0)
             with torch.no_grad():
                 if mean_action:
-                    action = policy(img_depth_var, goal_var)[0][0].numpy()
+                    action = policy(img_depth_var, goal_var, ray_var)[0][0].numpy()
                 else:
-                    action = policy.select_action(img_depth_var, goal_var)[0].numpy()
+                    action = policy.select_action(img_depth_var, goal_var, ray_var)[0].numpy()
             action = int(action) if policy.is_disc_action else action.astype(np.float64)
-            next_img_depth, next_goal, reward, done, _ = env.step(action, t)
+            next_img_depth, next_goal, next_ray, reward, done, _ = env.step(action)
             reward_episode += reward
             if running_state is not None:
                 # print "before", next_img_depth.shape, next_goal.shape
                 # print "depth_before:", np.max(next_img_depth), np.min(next_img_depth), "goal_before:", np.max(next_goal), np.min(goal)
-                _, next_goal = running_state(next_img_depth, next_goal)
-                next_img_depth = np.float64((next_img_depth - 2.5) / 2.5)
+                _, next_goal, next_ray = running_state(next_img_depth, next_goal, next_ray)
+                next_img_depth = np.float64((next_img_depth - 0.5) / 0.5)
                 # print next_img_depth
                 # print "depth_after:", np.max(next_img_depth), np.min(next_img_depth), "goal_after:", np.max(next_goal), np.min(goal), "\n\n\n"
                 # print "after", next_img_depth.shape, next_goal.shape
             else:
-                next_img_depth, next_goal = next_img_depth.astype(np.float64),\
-                                            next_goal.astype(np.float64)
+                next_img_depth, next_goal, next_ray = next_img_depth.astype(np.float64),\
+                                            next_goal.astype(np.float64), next_ray.astype(np.float64)
 
             if custom_reward is not None:
-                reward = custom_reward(img_depth, goal, action)
+                reward = custom_reward(img_depth, goal, ray, action)
                 total_c_reward += reward
                 min_c_reward = min(min_c_reward, reward)
                 max_c_reward = max(max_c_reward, reward)
 
             mask = 0 if done else 1
 
-            memory.push(img_depth, goal, action, mask, next_img_depth, next_goal, reward)
+            memory.push(img_depth, goal, ray, action, mask, next_img_depth, next_goal, reward)
 
             if render:
                 env.render()
@@ -94,6 +95,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
 
             img_depth = next_img_depth
             goal = next_goal
+            ray = next_ray
 
         # log stats
         num_steps += (t + 1)

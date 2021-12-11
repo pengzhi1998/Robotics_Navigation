@@ -39,7 +39,7 @@ class Policy(nn.Module):
         goal = goal.view(goal.size(0), -1)
         goal = self.relu(self.fc_goal(goal))
 
-        ray = goal.view(ray.size(0), -1)
+        ray = ray.view(ray.size(0), -1)
         ray = self.relu(self.fc_ray(ray))
 
         img_goal_ray = torch.cat((depth_img, goal, ray), 1)
