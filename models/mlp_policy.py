@@ -14,21 +14,22 @@ class Policy(nn.Module):
         self.conv3 = nn.Conv2d(64, 64, (3, 3), 1, padding=(1, 1))
         self.fc_img = nn.Linear(8 * 10 * 64, 512)
 
-        """ layers for inputs of goals """
-        self.fc_goal = nn.Linear(4 * 2, 64)
+        """ layers for inputs of goals and rays """
+        self.fc_goal = nn.Linear(4 * 3, 96)
+        self.fc_ray = nn.Linear(4 * 1, 32)
 
         """ layers for inputs concatenated information """
-        self.img_goal1 = nn.Linear(576, 512)
-        self.img_goal2 = nn.Linear(512, action_dim) # two dimensions of actions: upward and downward; turning
+        self.img_goal_ray1 = nn.Linear(640, 512)
+        self.img_goal_ray2 = nn.Linear(512, action_dim) # two dimensions of actions: upward and downward; turning
 
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
-        self.img_goal2.weight.data.mul_(1)
-        self.img_goal2.bias.data.mul_(0.0)
+        self.img_goal_ray2.weight.data.mul_(1)
+        self.img_goal_ray2.bias.data.mul_(0.0)
 
         self.action_log_std = nn.Parameter(torch.ones(1, action_dim) * log_std)
 
-    def forward(self, depth_img, goal):
+    def forward(self, depth_img, goal, ray):
         depth_img = self.relu(self.conv1(depth_img))
         depth_img = self.relu(self.conv2(depth_img))
         depth_img = self.relu(self.conv3(depth_img))
@@ -38,22 +39,25 @@ class Policy(nn.Module):
         goal = goal.view(goal.size(0), -1)
         goal = self.relu(self.fc_goal(goal))
 
-        img_goal = torch.cat((depth_img, goal), 1)
-        img_goal = self.relu(self.img_goal1(img_goal))
-        action_mean = self.tanh(self.img_goal2(img_goal))
+        ray = goal.view(ray.size(0), -1)
+        ray = self.relu(self.fc_ray(ray))
+
+        img_goal_ray = torch.cat((depth_img, goal, ray), 1)
+        img_goal_ray = self.relu(self.img_goal_ray1(img_goal_ray))
+        action_mean = self.tanh(self.img_goal_ray2(img_goal_ray))
 
         action_log_std = self.action_log_std.expand_as(action_mean)
         action_std = torch.exp(action_log_std)
 
         return action_mean, action_log_std, action_std
 
-    def select_action(self, depth_img, goal):
-        action_mean, _, action_std = self.forward(depth_img, goal)
+    def select_action(self, depth_img, goal, ray):
+        action_mean, _, action_std = self.forward(depth_img, goal, ray)
         # print "action:", action_mean, action_std
         action = torch.clamp(torch.normal(action_mean, action_std), -1, 1)
         # print action, "\n\n\n"
         return action
 
-    def get_log_prob(self, depth_img, goal, actions):
-        action_mean, action_log_std, action_std = self.forward(depth_img, goal)
+    def get_log_prob(self, depth_img, goal, ray, actions):
+        action_mean, action_log_std, action_std = self.forward(depth_img, goal, ray)
         return normal_log_density(actions, action_mean, action_log_std, action_std)

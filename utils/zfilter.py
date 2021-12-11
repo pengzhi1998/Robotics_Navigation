@@ -20,7 +20,7 @@ class RunningStat(object):
         ray = np.asarray(ray)
         assert img_depth.shape == self._M_img_depth.shape and\
                goal.shape == self._M_goal.shape and\
-            ray.shape == self._M_ray
+            ray.shape == self._M_ray.shape
         self._n += 1
         if self._n == 1:
             self._M_img_depth[...] = img_depth

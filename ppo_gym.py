@@ -59,10 +59,10 @@ if torch.cuda.is_available():
 """environment"""
 env = Underwater_navigation()
 img_depth_dim = env.observation_space_img_depth
-# print "dimension:", env.observation_space_img_depth, "\n\n\n"
 goal_dim = env.observation_space_goal
+ray_dim = env.observation_space_ray
 is_disc_action = len(env.action_space.shape) == 0
-running_state = ZFilter(img_depth_dim, goal_dim, clip=30) # set clip to be 30 which is the maximum value for the depth value
+running_state = ZFilter(img_depth_dim, goal_dim, ray_dim, clip=30) # set clip to be 30 which is the maximum value for the depth value
 # running_reward = ZFilter((1,), demean=False, clip=10)
 
 """seeding"""
