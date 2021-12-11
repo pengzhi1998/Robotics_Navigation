@@ -36,12 +36,12 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     print(time.time())
 
     while num_steps < min_batch_size:
-        img_depth, goal = env.reset()
+        img_depth, goal, ray = env.reset()
         if running_state is not None:
             # print "before", img_depth.shape, goal.shape, img_depth.dtype
             # print "first_depth_before:", np.max(img_depth), "first_goal_before:", np.max(goal)
-            _, goal = running_state(img_depth, goal)
-            img_depth = np.float64((img_depth - 2.5) / 2.5)
+            _, goal, ray = running_state(img_depth, goal, ray)
+            img_depth = np.float64((img_depth - 0.5) / 0.5) # the predicted depth ranges from 0 - 1
             # print "first_depth_after:", np.max(img_depth), "first_goal_after:", np.max(goal)
             # print "after", img_depth.shape, goal.shape, img_depth.dtype
         else:

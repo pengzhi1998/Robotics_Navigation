@@ -61,7 +61,6 @@ env = Underwater_navigation()
 img_depth_dim = env.observation_space_img_depth
 # print "dimension:", env.observation_space_img_depth, "\n\n\n"
 goal_dim = env.observation_space_goal
-# state_dim = depth_dim + goal_dim
 is_disc_action = len(env.action_space.shape) == 0
 running_state = ZFilter(img_depth_dim, goal_dim, clip=30) # set clip to be 30 which is the maximum value for the depth value
 # running_reward = ZFilter((1,), demean=False, clip=10)
@@ -69,7 +68,7 @@ running_state = ZFilter(img_depth_dim, goal_dim, clip=30) # set clip to be 30 wh
 """seeding"""
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
-env.seed(args.seed)
+# env.seed(args.seed)
 
 """define actor and critic"""
 if args.model_path is None:
@@ -127,6 +126,7 @@ def update_params(batch, i_iter):
 
 
 def main_loop():
+    print("hi\n\n\n\n\n")
     for i_iter in range(args.max_iter_num):
         """generate multiple trajectories that reach the minimum batch_size"""
         batch, log = agent.collect_samples(args.min_batch_size, render=args.render)

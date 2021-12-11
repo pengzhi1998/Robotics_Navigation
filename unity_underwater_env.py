@@ -5,6 +5,7 @@ import torch
 import time
 import uuid
 
+from gym import spaces
 from mlagents_envs.environment import UnityEnvironment
 from gym_unity.envs import UnityToGymWrapper
 from mlagents_envs.side_channel.side_channel import (
@@ -134,6 +135,7 @@ class DPT_depth():
                 sample = sample.half()
             time4 = time.time()
             prediction = self.model.forward(sample)
+            torch.cuda.synchronize()
             time5 = time.time()
             prediction = (
                 torch.nn.functional.interpolate(
@@ -142,7 +144,11 @@ class DPT_depth():
                     mode="bicubic",
                     align_corners=False,
                 )
+                .squeeze()
+                .cpu()
+                .numpy()
             )
+            torch.cuda.synchronize()
             time6 = time.time()
             depth_min = prediction.min()
             depth_max = prediction.max()
@@ -184,6 +190,16 @@ class PosChannel(SideChannel):
 
 class Underwater_navigation():
     def __init__(self):
+        self.twist_range = np.pi / 6
+        self.vertical_range = 0.1
+        self.action_space = spaces.Box(
+            np.array([-self.twist_range, -self.vertical_range]).astype(np.float32),
+            np.array([self.twist_range, self.vertical_range]).astype(np.float32),
+        )
+        self.observation_space_img_depth = (HIST, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
+        self.observation_space_goal = (HIST, DIM_GOAL)
+        self.observation_space_ray = (HIST, 1)
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
@@ -204,20 +220,17 @@ class Underwater_navigation():
         obs_goal = np.array(self.pos_info.goal_info())
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
-        self.obs_preddepths = torch.cat((obs_preddepth, obs_preddepth, obs_preddepth, obs_preddepth),
-                                        dim=1) # torch.Size([1, 4, 128, 160])
+        self.obs_preddepths = np.stack((obs_preddepth, obs_preddepth, obs_preddepth, obs_preddepth),
+                                        axis=0) # torch.Size([1, 4, 128, 160])
 
-        print("obs_preddepth:", self.obs_preddepths.size(), obs_preddepth.size())
+        self.obs_goals = np.stack((obs_goal, obs_goal, obs_goal, obs_goal), axis=0)
 
-        obs_goal = torch.reshape(torch.from_numpy(obs_goal).to(self.device), (1, DIM_GOAL))
-        self.obs_goals = torch.cat((obs_goal, obs_goal, obs_goal, obs_goal), dim=0)
-
-        obs_ray = torch.reshape(torch.from_numpy(obs_ray).to(self.device), (1, 1))  # single beam sonar
-        self.obs_rays = torch.cat((obs_ray, obs_ray, obs_ray, obs_ray), dim=0)
+        self.obs_rays = np.stack((obs_ray, obs_ray, obs_ray, obs_ray), axis=0)
 
         return [self.obs_preddepths, self.obs_goals, self.obs_rays]
 
     def step(self, action):
+        self.time_before = time.time()
         # action[0] controls its vertical speed, action[1] controls its rotation speed
         action_ver = action[0] / 5
         action_rot = action[1] * np.pi/6
@@ -266,23 +279,25 @@ class Underwater_navigation():
             print("Exceeds the max num_step...\n\n\n")
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
-        self.obs_preddepths = torch.cat((obs_preddepth, self.obs_preddepths[:, :(HIST - 1), :, :]), dim=1)
+        obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
+        self.obs_preddepths = np.append(obs_preddepth, self.obs_preddepths[:(HIST - 1), :, :], axis=0)
 
-        obs_goal = torch.reshape(torch.from_numpy(np.array(obs_goal)).to(self.device), (1, DIM_GOAL))
-        self.obs_goals = torch.cat((obs_goal, self.obs_goals[:(HIST - 1), :]), dim=0)
+        obs_goal = np.reshape(np.array(obs_goal), (1, DIM_GOAL))
+        self.obs_goals = np.append(obs_goal, self.obs_goals[:(HIST - 1), :], axis=0)
 
-        obs_ray = torch.reshape(torch.from_numpy(np.array(obs_ray)).to(self.device), (1, 1))  # single beam sonar
-        self.obs_rays = torch.cat((obs_ray, self.obs_rays[:(HIST - 1), :]), dim=0)
-
+        obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
+        self.obs_rays = np.append(obs_ray, self.obs_rays[:(HIST - 1), :], axis=0)
+        self.time_after = time.time()
+        print("execution_time:", self.time_after - self.time_before)
         return [self.obs_preddepths, self.obs_goals, self.obs_rays], reward, done, 0
 
-env = Underwater_navigation()
-
-while True:
-    done = False
-    obs = env.reset()
-    # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
-    while not done:
-        obs, reward, done, _ = env.step([0.0, - 1.0])
-        # print(obs[1], np.shape(obs[1]))
-        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+# env = Underwater_navigation()
+#
+# while True:
+#     done = False
+#     obs = env.reset()
+#     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+#     while not done:
+#         obs, reward, done, _ = env.step([0.0, - 1.0])
+#         # print(obs[1], np.shape(obs[1]))
+#         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
