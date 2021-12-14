@@ -283,13 +283,13 @@ class Underwater_navigation():
         print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 
-env = Underwater_navigation()
+# env = Underwater_navigation()
 
-while True:
-    done = False
-    obs = env.reset()
-    # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
-    while not done:
-        _, _, _, reward, done, _ = env.step([-1.0, - 1.0])
+# while True:
+#     done = False
+#     obs = env.reset()
+#     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+#     while not done:
+#         _, _, _, reward, done, _ = env.step([0.0, 0.0])
         # print(obs[1], np.shape(obs[1]))
         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
