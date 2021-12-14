@@ -29,6 +29,7 @@ class DPT_depth():
     def __init__(self, device, model_type="dpt_large", model_path="DPT/weights/dpt_large-midas-2f21e586.pt",
                  optimize=True):
         self.optimize = optimize
+        self.THRESHOLD = torch.tensor(np.finfo("float").eps).to(device)
 
         # load network
         if model_type == "dpt_large":  # DPT-Large
@@ -123,20 +124,13 @@ class DPT_depth():
         self.model.to(self.device)
 
     def run(self, rgb_img):
-        time0 = time.time()
         img_input = self.transform({"image": rgb_img})["image"]
-        time1 = time.time()
         with torch.no_grad():
-            time2 = time.time()
             sample = torch.from_numpy(img_input).to(self.device).unsqueeze(0)
-            time3 = time.time()
             if self.optimize == True and self.device == torch.device("cuda"):
                 sample = sample.to(memory_format=torch.channels_last)
                 sample = sample.half()
-            time4 = time.time()
             prediction = self.model.forward(sample)
-            torch.cuda.synchronize()
-            time5 = time.time()
             prediction = (
                 torch.nn.functional.interpolate(
                     prediction.unsqueeze(0),
@@ -148,19 +142,10 @@ class DPT_depth():
                 .cpu()
                 .numpy()
             )
-            torch.cuda.synchronize()
-            time6 = time.time()
             depth_min = prediction.min()
             depth_max = prediction.max()
-            time7 = time.time()
-            # a = (depth_max - depth_min).cpu().data.numpy()
-            time8 = time.time()
-            # b = self.THRESHOLD.cpu().data.numpy()
-            time9 = time.time()
-            if True:
-                time10 = time.time()
+            if depth_max - depth_min > self.THRESHOLD:
                 prediction = (prediction - depth_min) / (depth_max - depth_min)
-                time11 = time.time()
             else:
                 prediction = np.zeros(prediction.shape, dtype=prediction.dtype)
 
@@ -170,8 +155,6 @@ class DPT_depth():
             # plt.show()
 
             # cv2.imwrite("depth.png", ((prediction_show*65536).astype("uint16")), [cv2.IMWRITE_PNG_COMPRESSION, 0])
-            print("time:", time1 - time0, time2 - time1, time3 - time2, time4 - time3, time5 - time4, time6 - time5,
-                  time7 - time6, time8 - time7, time9 - time8)
         return prediction
 
 class PosChannel(SideChannel):
@@ -183,10 +166,10 @@ class PosChannel(SideChannel):
         Note: We must implement this method of the SideChannel interface to
         receive messages from Unity
         """
-        self.goal = msg.read_float32_list()
+        self.goal_depthfromwater = msg.read_float32_list()
 
-    def goal_info(self):
-        return self.goal
+    def goal_depthfromwater_info(self):
+        return self.goal_depthfromwater
 
 class Underwater_navigation():
     def __init__(self):
@@ -217,13 +200,14 @@ class Underwater_navigation():
         # observations per frame
         obs_preddepth = self.dpt.run(obs_img_ray[0])
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 12 * 0.8])
-        obs_goal = np.array(self.pos_info.goal_info())
+        obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         self.obs_preddepths = np.stack((obs_preddepth, obs_preddepth, obs_preddepth, obs_preddepth),
                                         axis=0) # torch.Size([1, 4, 128, 160])
 
-        self.obs_goals = np.stack((obs_goal, obs_goal, obs_goal, obs_goal), axis=0)
+        self.obs_goals = np.stack((obs_goal_depthfromwater[:3], obs_goal_depthfromwater[:3],
+                                   obs_goal_depthfromwater[:3], obs_goal_depthfromwater[:3]), axis=0)
 
         self.obs_rays = np.stack((obs_ray, obs_ray, obs_ray, obs_ray), axis=0)
 
@@ -232,7 +216,7 @@ class Underwater_navigation():
     def step(self, action):
         self.time_before = time.time()
         # action[0] controls its vertical speed, action[1] controls its rotation speed
-        action_ver = action[0] / 5
+        action_ver = action[0] / 10
         action_rot = action[1] * np.pi/6
 
         # observations per frame
@@ -242,23 +226,24 @@ class Underwater_navigation():
         time1 = time.time()
         print("time:", time1 - time0)
         obs_ray = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 12 * 0.8
-        obs_goal = self.pos_info.goal_info()
+        obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
         # compute reward
-        # 1. give a negative reward when robot is too close to nearby obstacles
+        # 1. give a negative reward when robot is too close to nearby obstacles, seafloor or the water surface
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
                              obs_img_ray[1][13], obs_img_ray[1][15], obs_img_ray[1][17],
                              obs_img_ray[1][19], obs_img_ray[1][21]]) * 12 * 0.8
-        if obstacle_distance < 0.6:
+        if obstacle_distance < 0.6 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
+                or np.abs(obs_goal_depthfromwater[3]+3) < 0.3:
             reward_obstacle = -10
             done = True
-            print("Too close to the obstacle!\n\n\n")
+            print("Too close to the obstacle, seafloor or water surface!\n\n\n")
         else:
             reward_obstacle = 0
 
         # 2. give a positive reward if the robot reaches the goal
-        if obs_goal[0] < 0.3 and obs_goal[1] < 0.05:
+        if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
             reward_goal_reached = 10
             done = True
             print("Reached the goal area!\n\n\n")
@@ -266,7 +251,14 @@ class Underwater_navigation():
             reward_goal_reached = 0
 
         # 3. give a positive reward if the robot is reaching the goal
-        reward_goal_reaching = (-np.abs(np.deg2rad(obs_goal[2])) + np.pi / 3) / 10
+        reward_goal_reaching = (-np.abs(np.deg2rad(obs_goal_depthfromwater[2])) + np.pi / 3) / 10
+        if (obs_goal_depthfromwater[1] > 0 and action_ver > 0) or\
+                (obs_goal_depthfromwater[1] < 0 and action_ver < 0):
+            reward_goal_reaching += 0.05
+            print("reaching the goal vertically", obs_goal_depthfromwater[1], action_ver)
+        else:
+            reward_goal_reaching -= 0.05
+            print("being away from the goal vertically", obs_goal_depthfromwater[1], action_ver)
 
         # 4. give a negative reward if the robot usually turns its directions
         reward_turning = - np.abs(action_rot) / 10
@@ -282,7 +274,7 @@ class Underwater_navigation():
         obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
         self.obs_preddepths = np.append(obs_preddepth, self.obs_preddepths[:(HIST - 1), :, :], axis=0)
 
-        obs_goal = np.reshape(np.array(obs_goal), (1, DIM_GOAL))
+        obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
         self.obs_goals = np.append(obs_goal, self.obs_goals[:(HIST - 1), :], axis=0)
 
         obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
@@ -291,13 +283,13 @@ class Underwater_navigation():
         print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 
-# env = Underwater_navigation()
-#
-# while True:
-#     done = False
-#     obs = env.reset()
-#     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
-#     while not done:
-#         obs, reward, done, _ = env.step([0.0, - 1.0])
-#         # print(obs[1], np.shape(obs[1]))
-#         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+env = Underwater_navigation()
+
+while True:
+    done = False
+    obs = env.reset()
+    # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+    while not done:
+        _, _, _, reward, done, _ = env.step([-1.0, - 1.0])
+        # print(obs[1], np.shape(obs[1]))
+        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
