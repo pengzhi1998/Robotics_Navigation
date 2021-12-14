@@ -127,7 +127,6 @@ def update_params(batch, i_iter):
 
 
 def main_loop():
-    print("hi\n\n\n\n\n")
     for i_iter in range(args.max_iter_num):
         """generate multiple trajectories that reach the minimum batch_size"""
         batch, log = agent.collect_samples(args.min_batch_size, render=args.render)

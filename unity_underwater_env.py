@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 import time
 import uuid
+import os
 
 from gym import spaces
 from mlagents_envs.environment import UnityEnvironment
@@ -26,7 +27,8 @@ HIST = 4
 BITS = 2
 
 class DPT_depth():
-    def __init__(self, device, model_type="dpt_large", model_path="DPT/weights/dpt_large-midas-2f21e586.pt",
+    def __init__(self, device, model_type="dpt_large", model_path=
+    os.path.abspath("./") + "/DPT/weights/dpt_large-midas-2f21e586.pt",
                  optimize=True):
         self.optimize = optimize
         self.THRESHOLD = torch.tensor(np.finfo("float").eps).to(device)
@@ -186,7 +188,7 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment("/home/pengzhi1998/Unity/ml-agents/environments/water",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
                                      side_channels=[config_channel, self.pos_info])
         config_channel.set_configuration_parameters(time_scale=1.0, capture_frame_rate=10)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
@@ -282,14 +284,14 @@ class Underwater_navigation():
         self.time_after = time.time()
         print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
-
+#
 # env = Underwater_navigation()
-
+#
 # while True:
 #     done = False
 #     obs = env.reset()
 #     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
 #     while not done:
 #         _, _, _, reward, done, _ = env.step([0.0, 0.0])
-        # print(obs[1], np.shape(obs[1]))
-        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+#         # print(obs[1], np.shape(obs[1]))
+#         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
