@@ -226,7 +226,7 @@ class Underwater_navigation():
         time0 = time.time()
         obs_preddepth = self.dpt.run(obs_img_ray[0])
         time1 = time.time()
-        print("time:", time1 - time0)
+        # print("time:", time1 - time0)
         obs_ray = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 12 * 0.8
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
@@ -282,19 +282,19 @@ class Underwater_navigation():
         obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
         self.obs_rays = np.append(obs_ray, self.obs_rays[:(HIST - 1), :], axis=0)
         self.time_after = time.time()
-        print("execution_time:", self.time_after - self.time_before)
+        # print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 #
-env = Underwater_navigation()
-
-while True:
-    a = 0
-    done = False
-    obs = env.reset()
-    # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
-    while not done:
-        cam, goal, ray, reward, done, _ = env.step([1.0, 0.0])
-        print(a)
-        a += 1
+# env = Underwater_navigation()
+#
+# while True:
+#     a = 0
+#     done = False
+#     obs = env.reset()
+#     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+#     while not done:
+#         cam, goal, ray, reward, done, _ = env.step([1.0, 0.0])
+#         print(a)
+#         a += 1
         # print(obs[1], np.shape(obs[1]))
         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
