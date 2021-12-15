@@ -175,7 +175,7 @@ class PosChannel(SideChannel):
 
 class Underwater_navigation():
     def __init__(self):
-        self.twist_range = np.pi / 6
+        self.twist_range = 30 # degree
         self.vertical_range = 0.1
         self.action_space = spaces.Box(
             np.array([-self.twist_range, -self.vertical_range]).astype(np.float32),
@@ -190,7 +190,7 @@ class Underwater_navigation():
         config_channel = EngineConfigurationChannel()
         unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
                                      side_channels=[config_channel, self.pos_info])
-        config_channel.set_configuration_parameters(time_scale=1.0, capture_frame_rate=10)
+        config_channel.set_configuration_parameters(time_scale=1, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
 
         self.dpt = DPT_depth(self.device)
@@ -218,8 +218,8 @@ class Underwater_navigation():
     def step(self, action):
         self.time_before = time.time()
         # action[0] controls its vertical speed, action[1] controls its rotation speed
-        action_ver = action[0] / 10
-        action_rot = action[1] * np.pi/6
+        action_ver = action[0]
+        action_rot = action[1] * self.twist_range
 
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
@@ -285,13 +285,16 @@ class Underwater_navigation():
         print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 #
-# env = Underwater_navigation()
-#
-# while True:
-#     done = False
-#     obs = env.reset()
-#     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
-#     while not done:
-#         _, _, _, reward, done, _ = env.step([0.0, 0.0])
-#         # print(obs[1], np.shape(obs[1]))
-#         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+env = Underwater_navigation()
+
+while True:
+    a = 0
+    done = False
+    obs = env.reset()
+    # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+    while not done:
+        cam, goal, ray, reward, done, _ = env.step([1.0, 0.0])
+        print(a)
+        a += 1
+        # print(obs[1], np.shape(obs[1]))
+        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
