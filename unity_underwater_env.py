@@ -263,7 +263,7 @@ class Underwater_navigation():
             # print("being away from the goal vertically", obs_goal_depthfromwater[1], action_ver)
 
         # 4. give a negative reward if the robot usually turns its directions
-        reward_turning = - np.abs(action_rot) / 10
+        reward_turning = - np.abs(action_rot) / 600
 
         reward = reward_obstacle + reward_goal_reached + reward_goal_reaching + reward_turning
         self.step_count += 1
