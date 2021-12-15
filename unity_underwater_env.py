@@ -200,7 +200,7 @@ class Underwater_navigation():
         obs_img_ray = self.env.reset()
 
         # observations per frame
-        obs_preddepth = self.dpt.run(obs_img_ray[0])
+        obs_preddepth = 1 - self.dpt.run(obs_img_ray[0])
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 12 * 0.8])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
@@ -257,10 +257,10 @@ class Underwater_navigation():
         if (obs_goal_depthfromwater[1] > 0 and action_ver > 0) or\
                 (obs_goal_depthfromwater[1] < 0 and action_ver < 0):
             reward_goal_reaching += 0.05
-            print("reaching the goal vertically", obs_goal_depthfromwater[1], action_ver)
+            # print("reaching the goal vertically", obs_goal_depthfromwater[1], action_ver)
         else:
             reward_goal_reaching -= 0.05
-            print("being away from the goal vertically", obs_goal_depthfromwater[1], action_ver)
+            # print("being away from the goal vertically", obs_goal_depthfromwater[1], action_ver)
 
         # 4. give a negative reward if the robot usually turns its directions
         reward_turning = - np.abs(action_rot) / 10
@@ -282,7 +282,7 @@ class Underwater_navigation():
         obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
         self.obs_rays = np.append(obs_ray, self.obs_rays[:(HIST - 1), :], axis=0)
         self.time_after = time.time()
-        # print("execution_time:", self.time_after - self.time_before)
+        print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 #
 # env = Underwater_navigation()
