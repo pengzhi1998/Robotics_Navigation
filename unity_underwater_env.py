@@ -189,6 +189,7 @@ class Underwater_navigation():
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
         unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
+        # unity_env = UnityEnvironment("/home/pengzhi1998/Unity/Underwater-RL/underwater_env/water",
                                      side_channels=[config_channel, self.pos_info])
         config_channel.set_configuration_parameters(time_scale=1, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
@@ -201,7 +202,7 @@ class Underwater_navigation():
 
         # observations per frame
         obs_preddepth = 1 - self.dpt.run(obs_img_ray[0])
-        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 12 * 0.8])
+        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
@@ -223,24 +224,21 @@ class Underwater_navigation():
 
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
-        time0 = time.time()
         obs_preddepth = self.dpt.run(obs_img_ray[0])
-        time1 = time.time()
-        # print("time:", time1 - time0)
-        obs_ray = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 12 * 0.8
+        obs_ray = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
         # compute reward
         # 1. give a negative reward when robot is too close to nearby obstacles, seafloor or the water surface
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
-                             obs_img_ray[1][13], obs_img_ray[1][15], obs_img_ray[1][17],
-                             obs_img_ray[1][19], obs_img_ray[1][21]]) * 12 * 0.8
-        if obstacle_distance < 0.6 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
+                             obs_img_ray[1][13]]) * 10 * 0.5
+        if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
                 or np.abs(obs_goal_depthfromwater[3]+3) < 0.3:
             reward_obstacle = -10
             done = True
-            print("Too close to the obstacle, seafloor or water surface!\n\n\n")
+            print("Too close to the obstacle, seafloor or water surface!",
+                  obstacle_distance, obs_goal_depthfromwater[3],"\n\n\n")
         else:
             reward_obstacle = 0
 
@@ -285,16 +283,17 @@ class Underwater_navigation():
         print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 #
-# env = Underwater_navigation()
-#
-# while True:
-#     a = 0
-#     done = False
-#     obs = env.reset()
-#     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
-#     while not done:
-#         cam, goal, ray, reward, done, _ = env.step([1.0, 0.0])
-#         print(a)
-#         a += 1
+env = Underwater_navigation()
+
+while True:
+    a = 0
+    done = False
+    cam, goal, ray = env.reset()
+    # print(a, ray)
+    # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+    while not done:
+        cam, goal, ray, reward, done, _ = env.step([0.0, 0.0])
+        # print(a, ray)
+        a += 1
         # print(obs[1], np.shape(obs[1]))
         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
