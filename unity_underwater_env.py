@@ -191,7 +191,7 @@ class Underwater_navigation():
         unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
         # unity_env = UnityEnvironment("/home/pengzhi1998/Unity/Underwater-RL/underwater_env/water",
                                      side_channels=[config_channel, self.pos_info])
-        config_channel.set_configuration_parameters(time_scale=1, capture_frame_rate=100)
+        config_channel.set_configuration_parameters(time_scale=10, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
 
         self.dpt = DPT_depth(self.device)
