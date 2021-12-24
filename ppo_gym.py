@@ -57,11 +57,13 @@ if torch.cuda.is_available():
     torch.cuda.set_device(args.gpu_index)
 
 """environment"""
-env = Underwater_navigation()
-img_depth_dim = env.observation_space_img_depth
-goal_dim = env.observation_space_goal
-ray_dim = env.observation_space_ray
-is_disc_action = len(env.action_space.shape) == 0
+env = []
+for i in range(args.num_threads):
+    env.append(Underwater_navigation(i))
+img_depth_dim = env[0].observation_space_img_depth
+goal_dim = env[0].observation_space_goal
+ray_dim = env[0].observation_space_ray
+is_disc_action = len(env[0].action_space.shape) == 0
 running_state = ZFilter(img_depth_dim, goal_dim, ray_dim, clip=30) # set clip to be 30 which is the maximum value for the depth value
 # running_reward = ZFilter((1,), demean=False, clip=10)
 
@@ -73,9 +75,9 @@ torch.manual_seed(args.seed)
 """define actor and critic"""
 if args.model_path is None:
     if is_disc_action:
-        policy_net = DiscretePolicy(0, env.action_space.n)
+        policy_net = DiscretePolicy(0, env[0].action_space.n)
     else:
-        policy_net = Policy(env.action_space.shape[0], log_std=args.log_std)
+        policy_net = Policy(env[0].action_space.shape[0], log_std=args.log_std)
     value_net = Value()
 else:
     policy_net, value_net, running_state = pickle.load(open(args.model_path, "rb"))
@@ -163,5 +165,8 @@ def main_loop():
         """clean up gpu memory"""
         torch.cuda.empty_cache()
 
-
-main_loop()
+if __name__ == '__main__':
+    print("a")
+    torch.multiprocessing.set_start_method('spawn')
+    print("b")
+    main_loop()

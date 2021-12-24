@@ -169,13 +169,14 @@ class Agent:
         workers = []
 
         for i in range(self.num_threads-1):
-            worker_args = (i+1, queue, self.env, self.policy, self.custom_reward, mean_action,
+            env = self.env[i+1]
+            worker_args = (i+1, queue, env, self.policy, self.custom_reward, mean_action,
                            False, self.running_state, thread_batch_size)
             workers.append(multiprocessing.Process(target=collect_samples, args=worker_args))
         for worker in workers:
             worker.start()
 
-        memory, log = collect_samples(0, None, self.env, self.policy, self.custom_reward, mean_action,
+        memory, log = collect_samples(0, None, self.env[0], self.policy, self.custom_reward, mean_action,
                                       render, self.running_state, thread_batch_size)
                                       # render, None, thread_batch_size)
 

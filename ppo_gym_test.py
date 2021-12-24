@@ -56,10 +56,12 @@ if torch.cuda.is_available():
     torch.cuda.set_device(args.gpu_index)
 
 """environment"""
-env = Underwater_navigation()
-img_depth_dim = env.observation_space_img_depth
-goal_dim = env.observation_space_goal
-ray_dim = env.observation_space_ray
+env = []
+for i in range(args.num_threads):
+    env.append(Underwater_navigation(i))
+img_depth_dim = env[0].observation_space_img_depth
+goal_dim = env[0].observation_space_goal
+ray_dim = env[0].observation_space_ray
 
 """define actor and critic"""
 policy_net, value_net, running_state = pickle.load(

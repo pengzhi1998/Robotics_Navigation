@@ -174,7 +174,7 @@ class PosChannel(SideChannel):
         return self.goal_depthfromwater
 
 class Underwater_navigation():
-    def __init__(self):
+    def __init__(self, rank):
         self.twist_range = 30 # degree
         self.vertical_range = 0.1
         self.action_space = spaces.Box(
@@ -189,8 +189,7 @@ class Underwater_navigation():
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
         unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
-        # unity_env = UnityEnvironment("/home/pengzhi1998/Unity/Underwater-RL/underwater_env/water",
-                                     side_channels=[config_channel, self.pos_info])
+                                     side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5000+rank)
         config_channel.set_configuration_parameters(time_scale=10, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
 
@@ -282,18 +281,28 @@ class Underwater_navigation():
         self.time_after = time.time()
         print("execution_time:", self.time_after - self.time_before)
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
-#
-# env = Underwater_navigation()
+
+# env = []
+# for i in range(4):
+#     env.append(Underwater_navigation(i))
 #
 # while True:
 #     a = 0
 #     done = False
-#     cam, goal, ray = env.reset()
+#     cam, goal, ray = env[0].reset()
+#     cam, goal, ray = env[1].reset()
+#     cam, goal, ray = env[2].reset()
+#     cam, goal, ray = env[3].reset()
+#     # cam, goal, ray = env2.reset()
 #     # print(a, ray)
 #     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
 #     while not done:
-#         cam, goal, ray, reward, done, _ = env.step([0.0, 0.0])
+#         cam, goal, ray, reward, done, _ = env[0].step([0.0, 0.0])
+#         cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
+#         cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
+#         cam, goal, ray, reward, done, _ = env[3].step([0.0, 0.0])
+#         # cam, goal, ray, reward, done, _ = env2.step([0.0, 0.0])
 #         # print(a, ray)
 #         a += 1
-        # print(obs[1], np.shape(obs[1]))
-        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+#         # print(obs[1], np.shape(obs[1]))
+#         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
