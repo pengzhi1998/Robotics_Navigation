@@ -280,6 +280,10 @@ class Underwater_navigation():
         self.obs_rays = np.append(obs_ray, self.obs_rays[:(HIST - 1), :], axis=0)
         self.time_after = time.time()
         print("execution_time:", self.time_after - self.time_before)
+
+        # cv2.imwrite("img_rgb.png", 256 * cv2.cvtColor(obs_img_ray[0], cv2.COLOR_RGB2BGR))
+        # cv2.imwrite("img_depth_pred.png", 256 * self.obs_preddepths[0])
+
         return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
 
 # env = []
