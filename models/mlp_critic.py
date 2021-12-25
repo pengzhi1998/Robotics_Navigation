@@ -3,17 +3,17 @@ import torch
 
 
 class Value(nn.Module):
-    def __init__(self):
+    def __init__(self, HIST):
         super(Value, self).__init__()
         """ layers for inputs of depth_images """
-        self.conv1 = nn.Conv2d(4, 32, (10, 14), (8, 8), padding=(1, 4))
+        self.conv1 = nn.Conv2d(HIST, 32, (10, 14), (8, 8), padding=(1, 4))
         self.conv2 = nn.Conv2d(32, 64, (4, 4), 2, padding=(1, 1))
         self.conv3 = nn.Conv2d(64, 64, (3, 3), 1, padding=(1, 1))
         self.fc_img = nn.Linear(8 * 10 * 64, 512)
 
         """ layers for inputs of goals """
-        self.fc_goal = nn.Linear(4 * 3, 96)
-        self.fc_ray = nn.Linear(4 * 1, 32)
+        self.fc_goal = nn.Linear(HIST * 3, 96)
+        self.fc_ray = nn.Linear(HIST * 1, 32)
 
         """ layers for inputs concatenated information """
         self.img_goal_ray1 = nn.Linear(640, 512)

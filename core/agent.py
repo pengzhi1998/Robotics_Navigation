@@ -40,6 +40,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         if running_state is not None:
             # print "before", img_depth.shape, goal.shape, img_depth.dtype
             # print "first_depth_before:", np.max(img_depth), "first_goal_before:", np.max(goal)
+            print(np.shape(img_depth), np.shape(goal), np.shape(ray), "\n\n\n")
             _, goal, ray = running_state(img_depth, goal, ray)
             img_depth = np.float64((img_depth - 0.5) / 0.5) # the predicted depth ranges from 0 - 1
             # print "first_depth_after:", np.max(img_depth), "first_goal_after:", np.max(goal)

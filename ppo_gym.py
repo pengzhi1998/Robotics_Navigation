@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from utils import *
 from models.mlp_policy import Policy
 from models.mlp_critic import Value
-from models.mlp_policy_disc import DiscretePolicy
+from core.ppo import ppo_step
 from core.ppo import ppo_step
 from core.common import estimate_advantages
 from core.agent import Agent
@@ -33,6 +33,8 @@ parser.add_argument('--learning-rate', type=float, default=3e-5, metavar='G',
                     help='learning rate (default: 3e-5)')
 parser.add_argument('--clip-epsilon', type=float, default=0.2, metavar='N',
                     help='clipping epsilon for PPO')
+parser.add_argument('--hist-length', type=int, default=4, metavar='N',
+                    help="the number of consecutive history infos (default: 4)")
 parser.add_argument('--num-threads', type=int, default=1, metavar='N',
                     help='number of threads for agent (default: 4)')
 parser.add_argument('--seed', type=int, default=1, metavar='N',
@@ -59,7 +61,7 @@ if torch.cuda.is_available():
 """environment"""
 env = []
 for i in range(args.num_threads):
-    env.append(Underwater_navigation(i))
+    env.append(Underwater_navigation(i, args.hist_length))
 img_depth_dim = env[0].observation_space_img_depth
 goal_dim = env[0].observation_space_goal
 ray_dim = env[0].observation_space_ray
@@ -77,8 +79,8 @@ if args.model_path is None:
     if is_disc_action:
         policy_net = DiscretePolicy(0, env[0].action_space.n)
     else:
-        policy_net = Policy(env[0].action_space.shape[0], log_std=args.log_std)
-    value_net = Value()
+        policy_net = Policy(args.hist_length, env[0].action_space.shape[0], log_std=args.log_std)
+    value_net = Value(args.hist_length)
 else:
     policy_net, value_net, running_state = pickle.load(open(args.model_path, "rb"))
 policy_net.to(device)
