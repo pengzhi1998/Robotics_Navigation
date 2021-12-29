@@ -23,6 +23,7 @@ from DPT.dpt.transforms import Resize, NormalizeImage, PrepareForNet
 DEPTH_IMAGE_WIDTH = 160
 DEPTH_IMAGE_HEIGHT = 128
 DIM_GOAL = 3
+DIM_ACTION = 2
 BITS = 2
 
 class DPT_depth():
@@ -209,8 +210,10 @@ class Underwater_navigation():
         self.obs_preddepths = np.array([obs_preddepth.tolist()] * self.HIST) # torch.Size([1, 4, 128, 160])
         self.obs_goals = np.array([obs_goal_depthfromwater[:3].tolist()] * self.HIST)
         self.obs_rays = np.array([obs_ray.tolist()] * self.HIST)
+        self.obs_actions = np.array([[0, 0]] * self.HIST)
+        self.init_area_pos_z = obs_goal_depthfromwater[4]
 
-        return self.obs_preddepths, self.obs_goals, self.obs_rays
+        return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions
 
     def step(self, action):
         self.time_before = time.time()
@@ -229,14 +232,24 @@ class Underwater_navigation():
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
                              obs_img_ray[1][13]]) * 10 * 0.5
-        if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
-                or np.abs(obs_goal_depthfromwater[3]+3) < 0.3:
-            reward_obstacle = -10
-            done = True
-            print("Too close to the obstacle, seafloor or water surface!",
-                  obstacle_distance, obs_goal_depthfromwater[3],"\n\n\n")
+        if np.abs(self.init_area_pos_z) > 8:
+            if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
+                    or np.abs(obs_goal_depthfromwater[3]+4) < 0.3:
+                reward_obstacle = -10
+                done = True
+                print("Too close to the obstacle, seafloor or water surface!",
+                      obstacle_distance, obs_goal_depthfromwater[3],"\n\n\n")
+            else:
+                reward_obstacle = 0
         else:
-            reward_obstacle = 0
+            if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
+                    or np.abs(obs_goal_depthfromwater[3]+3) < 0.3:
+                reward_obstacle = -10
+                done = True
+                print("Too close to the obstacle, seafloor or water surface!",
+                      obstacle_distance, obs_goal_depthfromwater[3],"\n\n\n")
+            else:
+                reward_obstacle = 0
 
         # 2. give a positive reward if the robot reaches the goal
         if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
@@ -275,33 +288,39 @@ class Underwater_navigation():
 
         obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
         self.obs_rays = np.append(obs_ray, self.obs_rays[:(self.HIST - 1), :], axis=0)
+
+        obs_action = np.reshape(action, (1, DIM_ACTION))
+        self.obs_actions = np.append(obs_action, self.obs_actions[:(self.HIST - 1), :], axis=0)
+
         self.time_after = time.time()
         print("execution_time:", self.time_after - self.time_before)
+        # print("ray:", obs_ray)
 
         # cv2.imwrite("img_rgb.png", 256 * cv2.cvtColor(obs_img_ray[0], cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred.png", 256 * self.obs_preddepths[0])
 
-        return self.obs_preddepths, self.obs_goals, self.obs_rays, reward, done, 0
+        return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, reward, done, 0
 
 # env = []
-# for i in range(4):
-#     env.append(Underwater_navigation(i))
+# for i in range(1):
+#     env.append(Underwater_navigation(i, 6))
 #
 # while True:
 #     a = 0
 #     done = False
-#     cam, goal, ray = env[0].reset()
-#     cam, goal, ray = env[1].reset()
-#     cam, goal, ray = env[2].reset()
-#     cam, goal, ray = env[3].reset()
+#     cam, goal, ray, action = env[0].reset()
+#     # cam, goal, ray = env[1].reset()
+#     # cam, goal, ray = env[2].reset()
+#     # cam, goal, ray = env[3].reset()
 #     # cam, goal, ray = env2.reset()
 #     # print(a, ray)
 #     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
 #     while not done:
-#         cam, goal, ray, reward, done, _ = env[0].step([0.0, 0.0])
-#         cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
-#         cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
-#         cam, goal, ray, reward, done, _ = env[3].step([0.0, 0.0])
+#         cam, goal, ray, action, reward, done, _ = env[0].step([-1, 0.0])
+#         print(action)
+#         # cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
+#         # cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
+#         # cam, goal, ray, reward, done, _ = env[3].step([0.0, 0.0])
 #         # cam, goal, ray, reward, done, _ = env2.step([0.0, 0.0])
 #         # print(a, ray)
 #         a += 1

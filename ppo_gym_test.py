@@ -31,6 +31,8 @@ parser.add_argument('--learning-rate', type=float, default=3e-5, metavar='G',
                     help='learning rate (default: 3e-5)')
 parser.add_argument('--clip-epsilon', type=float, default=0.2, metavar='N',
                     help='clipping epsilon for PPO')
+parser.add_argument('--hist-length', type=int, default=4, metavar='N',
+                    help="the number of consecutive history infos (default: 4)")
 parser.add_argument('--num-threads', type=int, default=1, metavar='N',
                     help='number of threads for agent (default: 4)')
 parser.add_argument('--seed', type=int, default=1, metavar='N',
@@ -58,14 +60,14 @@ if torch.cuda.is_available():
 """environment"""
 env = []
 for i in range(args.num_threads):
-    env.append(Underwater_navigation(i))
+    env.append(Underwater_navigation(i, args.hist_length))
 img_depth_dim = env[0].observation_space_img_depth
 goal_dim = env[0].observation_space_goal
 ray_dim = env[0].observation_space_ray
 
 """define actor and critic"""
 policy_net, value_net, running_state = pickle.load(
-open(os.path.join(assets_dir(), 'learned_models/{}_ppo.p'.format(args.env_name)), "rb")
+open(os.path.join(assets_dir(), 'learned_models/{}_ppo_6.p'.format(args.env_name)), "rb")
 )
 policy_net.to(device)
 

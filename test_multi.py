@@ -5,7 +5,6 @@ import torch
 import time
 import uuid
 import os
-import ray
 from utils import *
 
 from gym import spaces
