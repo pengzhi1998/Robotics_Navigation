@@ -208,8 +208,11 @@ class Underwater_navigation():
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
         self.obs_preddepths = np.array([obs_preddepth.tolist()] * self.HIST) # torch.Size([1, 4, 128, 160])
+        self.obs_preddepths_buffer = np.array([obs_preddepth.tolist()] * (2 ** (self.HIST - 1)))
         self.obs_goals = np.array([obs_goal_depthfromwater[:3].tolist()] * self.HIST)
+        self.obs_goals_buffer = np.array([obs_goal_depthfromwater[:3].tolist()] * (2 ** (self.HIST - 1)))
         self.obs_rays = np.array([obs_ray.tolist()] * self.HIST)
+        self.obs_rays_buffer = np.array([obs_ray.tolist()] * (2 ** (self.HIST - 1)))
         self.obs_actions = np.array([[0, 0]] * self.HIST)
         self.init_area_pos_z = obs_goal_depthfromwater[4]
 
@@ -279,15 +282,32 @@ class Underwater_navigation():
             done = True
             print("Exceeds the max num_step...\n\n\n")
 
+        # # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
+        # obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
+        # self.obs_preddepths = np.append(obs_preddepth, self.obs_preddepths[:(self.HIST - 1), :, :], axis=0)
+        #
+        # obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
+        # self.obs_goals = np.append(obs_goal, self.obs_goals[:(self.HIST - 1), :], axis=0)
+        #
+        # obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
+        # self.obs_rays = np.append(obs_ray, self.obs_rays[:(self.HIST - 1), :], axis=0)
+
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
-        self.obs_preddepths = np.append(obs_preddepth, self.obs_preddepths[:(self.HIST - 1), :, :], axis=0)
+        self.obs_preddepths_buffer = np.append(obs_preddepth,
+                                               self.obs_preddepths_buffer[:(2 ** (self.HIST - 1) - 1), :, :], axis=0)
+        self.obs_preddepths = np.stack((self.obs_preddepths_buffer[0], self.obs_preddepths_buffer[1],
+                                       self.obs_preddepths_buffer[3], self.obs_preddepths_buffer[7]), axis=0)
 
         obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
-        self.obs_goals = np.append(obs_goal, self.obs_goals[:(self.HIST - 1), :], axis=0)
+        self.obs_goals_buffer = np.append(obs_goal, self.obs_goals_buffer[:(2 ** (self.HIST - 1) - 1), :], axis=0)
+        self.obs_goals = np.stack((self.obs_goals_buffer[0], self.obs_goals_buffer[1],
+                                        self.obs_goals_buffer[3], self.obs_goals_buffer[7]), axis=0)
 
         obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
-        self.obs_rays = np.append(obs_ray, self.obs_rays[:(self.HIST - 1), :], axis=0)
+        self.obs_rays_buffer = np.append(obs_ray, self.obs_rays_buffer[:(2 ** (self.HIST - 1) - 1), :], axis=0)
+        self.obs_rays = np.stack((self.obs_rays_buffer[0], self.obs_rays_buffer[1],
+                                   self.obs_rays_buffer[3], self.obs_rays_buffer[7]), axis=0)
 
         obs_action = np.reshape(action, (1, DIM_ACTION))
         self.obs_actions = np.append(obs_action, self.obs_actions[:(self.HIST - 1), :], axis=0)
@@ -303,7 +323,7 @@ class Underwater_navigation():
 
 # env = []
 # for i in range(1):
-#     env.append(Underwater_navigation(i, 6))
+#     env.append(Underwater_navigation(i, 4))
 #
 # while True:
 #     a = 0

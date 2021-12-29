@@ -67,7 +67,7 @@ ray_dim = env[0].observation_space_ray
 
 """define actor and critic"""
 policy_net, value_net, running_state = pickle.load(
-open(os.path.join(assets_dir(), 'learned_models/{}_ppo_6.p'.format(args.env_name)), "rb")
+open(os.path.join(assets_dir(), 'learned_models/{}_ppo_5.p'.format(args.env_name)), "rb")
 )
 policy_net.to(device)
 
