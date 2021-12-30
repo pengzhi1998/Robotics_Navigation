@@ -230,7 +230,14 @@ class Underwater_navigation():
         obs_ray = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
-        # compute reward
+        """
+            compute reward
+            obs_goal_depthfromwater[0]: horizontal distance
+            obs_goal_depthfromwater[1]: vertical distance
+            obs_goal_depthfromwater[2]: angle from robot's orientation to the goal (degree)
+            obs_goal_depthfromwater[3]: robot's current y position
+            obs_goal_depthfromwater[4]: robot's current z position            
+        """
         # 1. give a negative reward when robot is too close to nearby obstacles, seafloor or the water surface
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
@@ -256,61 +263,65 @@ class Underwater_navigation():
 
         # 2. give a positive reward if the robot reaches the goal
         if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
-            reward_goal_reached = 10
+            reward_goal_reached = 10 - 7.5 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2])) / 2
             done = True
             print("Reached the goal area!\n\n\n")
         else:
             reward_goal_reached = 0
 
         # 3. give a positive reward if the robot is reaching the goal
-        reward_goal_reaching = (-np.abs(np.deg2rad(obs_goal_depthfromwater[2])) + np.pi / 3) / 10
+        reward_goal_reaching_horizontal = (-np.abs(np.deg2rad(obs_goal_depthfromwater[2])) + np.pi / 3) / 10
         if (obs_goal_depthfromwater[1] > 0 and action_ver > 0) or\
                 (obs_goal_depthfromwater[1] < 0 and action_ver < 0):
-            reward_goal_reaching += 0.05
+            reward_goal_reaching_vertical = 0.05
             # print("reaching the goal vertically", obs_goal_depthfromwater[1], action_ver)
         else:
-            reward_goal_reaching -= 0.05
+            reward_goal_reaching_vertical = 0.05
             # print("being away from the goal vertically", obs_goal_depthfromwater[1], action_ver)
 
-        # 4. give a negative reward if the robot usually turns its directions
+        # 4. give negative rewards if the robot too often turns its direction or is near any obstacle
         reward_turning = - np.abs(action_rot) / 600
+        if 0.5 <= obstacle_distance < 1.:
+            reward_goal_reaching_horizontal *= (obstacle_distance - 0.5) / 0.5
+            reward_obstacle -= (1 - obstacle_distance) * 2
 
-        reward = reward_obstacle + reward_goal_reached + reward_goal_reaching + reward_turning
+        reward = reward_obstacle + reward_goal_reached + \
+                 reward_goal_reaching_horizontal + reward_goal_reaching_vertical + reward_turning
         self.step_count += 1
 
         if self.step_count > 500:
             done = True
             print("Exceeds the max num_step...\n\n\n")
 
-        # # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
-        # obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
-        # self.obs_preddepths = np.append(obs_preddepth, self.obs_preddepths[:(self.HIST - 1), :, :], axis=0)
-        #
-        # obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
-        # self.obs_goals = np.append(obs_goal, self.obs_goals[:(self.HIST - 1), :], axis=0)
-        #
-        # obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
-        # self.obs_rays = np.append(obs_ray, self.obs_rays[:(self.HIST - 1), :], axis=0)
-
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
-        self.obs_preddepths_buffer = np.append(obs_preddepth,
-                                               self.obs_preddepths_buffer[:(2 ** (self.HIST - 1) - 1), :, :], axis=0)
-        self.obs_preddepths = np.stack((self.obs_preddepths_buffer[0], self.obs_preddepths_buffer[1],
-                                       self.obs_preddepths_buffer[3], self.obs_preddepths_buffer[7]), axis=0)
+        self.obs_preddepths = np.append(obs_preddepth, self.obs_preddepths[:(self.HIST - 1), :, :], axis=0)
 
         obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
-        self.obs_goals_buffer = np.append(obs_goal, self.obs_goals_buffer[:(2 ** (self.HIST - 1) - 1), :], axis=0)
-        self.obs_goals = np.stack((self.obs_goals_buffer[0], self.obs_goals_buffer[1],
-                                        self.obs_goals_buffer[3], self.obs_goals_buffer[7]), axis=0)
+        self.obs_goals = np.append(obs_goal, self.obs_goals[:(self.HIST - 1), :], axis=0)
 
         obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
-        self.obs_rays_buffer = np.append(obs_ray, self.obs_rays_buffer[:(2 ** (self.HIST - 1) - 1), :], axis=0)
-        self.obs_rays = np.stack((self.obs_rays_buffer[0], self.obs_rays_buffer[1],
-                                   self.obs_rays_buffer[3], self.obs_rays_buffer[7]), axis=0)
+        self.obs_rays = np.append(obs_ray, self.obs_rays[:(self.HIST - 1), :], axis=0)
 
-        obs_action = np.reshape(action, (1, DIM_ACTION))
-        self.obs_actions = np.append(obs_action, self.obs_actions[:(self.HIST - 1), :], axis=0)
+        # # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
+        # obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
+        # self.obs_preddepths_buffer = np.append(obs_preddepth,
+        #                                        self.obs_preddepths_buffer[:(2 ** (self.HIST - 1) - 1), :, :], axis=0)
+        # self.obs_preddepths = np.stack((self.obs_preddepths_buffer[0], self.obs_preddepths_buffer[1],
+        #                                self.obs_preddepths_buffer[3], self.obs_preddepths_buffer[7]), axis=0)
+        #
+        # obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
+        # self.obs_goals_buffer = np.append(obs_goal, self.obs_goals_buffer[:(2 ** (self.HIST - 1) - 1), :], axis=0)
+        # self.obs_goals = np.stack((self.obs_goals_buffer[0], self.obs_goals_buffer[1],
+        #                                 self.obs_goals_buffer[3], self.obs_goals_buffer[7]), axis=0)
+        #
+        # obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
+        # self.obs_rays_buffer = np.append(obs_ray, self.obs_rays_buffer[:(2 ** (self.HIST - 1) - 1), :], axis=0)
+        # self.obs_rays = np.stack((self.obs_rays_buffer[0], self.obs_rays_buffer[1],
+        #                            self.obs_rays_buffer[3], self.obs_rays_buffer[7]), axis=0)
+        #
+        # obs_action = np.reshape(action, (1, DIM_ACTION))
+        # self.obs_actions = np.append(obs_action, self.obs_actions[:(self.HIST - 1), :], axis=0)
 
         self.time_after = time.time()
         print("execution_time:", self.time_after - self.time_before)
