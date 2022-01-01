@@ -1,4 +1,5 @@
-# Training
+### Training
+<!--
 ## Dependencies
 Ubuntu 18.04, ROS Melodic, python 2.7.17, cuda 10.1, 10.0, torch 1.4.0
 
@@ -27,9 +28,17 @@ it instead.
         $ python ppo_gym.py --save-model-interval 5 --env-name navigation --eval-batch-size 0 --min-batch-size 2048
 
 (4) In the directory of assets, you would find the trained model and the log file.      
-<!--      
+    
  (4) After training, you could use `DDDQN_test.py`
 and `DDDQN_uwsim.py` to test the performance in Gazebo
 worlds and UWSim worlds respectively. For real-world
 tests, refer to [this](https://github.com/pengzhi1998/underwater_navigation_test)
- repository.-->
+ repository. -->
+ ```
+ python3 ppo_gym.py --save-model-interval 5 --env-name navigation --eval-batch-size 0 --min-batch-size 2048 --num-threads 1 --hist-length 5
+```
+### Testing
+Remember to modify the threshold value to 0.5m and 0.25m:
+```
+python3 ppo_gym_test.py --env-name navigation --eval-batch-size 2000 --hist-length 5
+```
