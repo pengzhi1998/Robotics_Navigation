@@ -2,15 +2,12 @@ import argparse
 import os
 import sys
 import pickle
-import time
+
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 from utils import *
-from models.mlp_policy import Policy
-from core.ppo import ppo_step
-from core.common import estimate_advantages
 from core.agent import Agent
-from unity_underwater_env import Underwater_navigation
+from core.unity_underwater_env import Underwater_navigation
 
 parser = argparse.ArgumentParser(description='PyTorch PPO example')
 parser.add_argument('--env-name', default="Hopper-v2", metavar='G',
@@ -47,6 +44,9 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
                     help='interval between training status logs (default: 10)')
 parser.add_argument('--save-model-interval', type=int, default=0, metavar='N',
                     help="interval between saving model (default: 0, means don't save)")
+parser.add_argument('--start-goal-pos', type=list, default=[8., -2., -0.376, 0., 270., 0., -3.86, -2.3, -4.15],
+                    metavar='N', help="during testing, what are the initial positions, orientations for the"
+                                      "robot and the initial positions for the goal point")
 parser.add_argument('--gpu-index', type=int, default=0, metavar='N')
 args = parser.parse_args()
 
@@ -59,15 +59,18 @@ if torch.cuda.is_available():
 
 """environment"""
 env = []
+start_goal_pos = [8., -2., -0.376, 0., 270., 0., -3.86, -2.3, -4.15]
 for i in range(args.num_threads):
-    env.append(Underwater_navigation(i, args.hist_length))
+    env.append(Underwater_navigation(i, args.hist_length,
+                                     start_goal_pos, False))
 img_depth_dim = env[0].observation_space_img_depth
 goal_dim = env[0].observation_space_goal
 ray_dim = env[0].observation_space_ray
 
 """define actor and critic"""
 policy_net, value_net, running_state = pickle.load(
-open(os.path.join(assets_dir(), 'learned_models/{}_ppo_5.p'.format(args.env_name)), "rb")
+open(os.path.join(assets_dir(), 'learned_models/{}_ppo_{}.p'.format(args.env_name,
+                                                                      args.hist_length)), "rb")
 )
 policy_net.to(device)
 

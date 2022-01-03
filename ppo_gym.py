@@ -11,7 +11,7 @@ from models.mlp_critic import Value
 from core.ppo import ppo_step
 from core.common import estimate_advantages
 from core.agent import Agent
-from unity_underwater_env import Underwater_navigation
+from core.unity_underwater_env import Underwater_navigation
 
 parser = argparse.ArgumentParser(description='PyTorch PPO example')
 parser.add_argument('--env-name', default="Hopper-v2", metavar='G',

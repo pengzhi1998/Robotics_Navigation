@@ -6,6 +6,7 @@ import time
 import uuid
 import os
 
+from typing import List
 from gym import spaces
 from mlagents_envs.environment import UnityEnvironment
 from gym_unity.envs import UnityToGymWrapper
@@ -173,13 +174,13 @@ class PosChannel(SideChannel):
     def goal_depthfromwater_info(self):
         return self.goal_depthfromwater
 
-    def reset_visibility(selfself, data: float) -> None:
+    def assign_testpos_visibility(self, data: List[float]) -> None:
         msg = OutgoingMessage()
-        msg.write_float32(data)
+        msg.write_float32_list(data)
         super().queue_message_to_send(msg)
 
 class Underwater_navigation():
-    def __init__(self, rank, HIST):
+    def __init__(self, rank, HIST, start_goal_pos=None, training=True):
         self.HIST = HIST
         self.twist_range = 30 # degree
         self.vertical_range = 0.1
@@ -194,8 +195,16 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test0",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5000+rank)
+
+        self.training = training
+        if self.training == False:
+            if start_goal_pos == None:
+                raise AssertionError
+            self.start_goal_pos = start_goal_pos
+            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
+
         config_channel.set_configuration_parameters(time_scale=10, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
 
@@ -209,7 +218,11 @@ class Underwater_navigation():
         obs_preddepth = 1 - self.dpt.run(obs_img_ray[0])
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
-        self.pos_info.reset_visibility(20)
+        if self.training == False:
+            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
+        else:
+            self.pos_info.assign_testpos_visibility([0] * 8 + [20])
+
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")

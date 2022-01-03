@@ -1,27 +1,17 @@
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-import torch
 import time
 import uuid
-import os
 from utils import *
 
-from gym import spaces
 from mlagents_envs.environment import UnityEnvironment
 from gym_unity.envs import UnityToGymWrapper
 import multiprocessing
 import torch
 from models.mlp_policy import Policy
-from unity_underwater_env import Underwater_navigation
-# from subprocess import Popen
-# from ray import tune
-# from threading import Lock
+from core.unity_underwater_env import Underwater_navigation
 
 from mlagents_envs.side_channel.side_channel import (
     SideChannel,
     IncomingMessage,
-    OutgoingMessage,
 )
 from mlagents_envs.side_channel.engine_configuration_channel import EngineConfigurationChannel
 
