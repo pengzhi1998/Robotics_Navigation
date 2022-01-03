@@ -173,7 +173,7 @@ class PosChannel(SideChannel):
     def goal_depthfromwater_info(self):
         return self.goal_depthfromwater
 
-    def send_float(selfself, data: float) -> None:
+    def reset_visibility(selfself, data: float) -> None:
         msg = OutgoingMessage()
         msg.write_float32(data)
         super().queue_message_to_send(msg)
@@ -209,7 +209,7 @@ class Underwater_navigation():
         obs_preddepth = 1 - self.dpt.run(obs_img_ray[0])
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
-        self.pos_info.send_float(20)
+        self.pos_info.reset_visibility(20)
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")

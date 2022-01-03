@@ -13,7 +13,7 @@ For next step, we'll use UUVSimulator to train
 it instead.
 * Copy the designed world `empty.world`
  and launch file `turtlebot3_empty_world.launch` from 
- `assest/Training_environments` into the worlds directory
+ `assest/ROS` into the worlds directory
  and launch file directory respectively.
 * Install the dependencies for training.
 
