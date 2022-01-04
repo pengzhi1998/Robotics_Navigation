@@ -261,24 +261,16 @@ class Underwater_navigation():
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
                              obs_img_ray[1][13]]) * 10 * 0.5
-        if np.abs(self.init_area_pos_z) > 8:
-            if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
-                    or np.abs(obs_goal_depthfromwater[3]+4) < 0.3:
-                reward_obstacle = -10
-                done = True
-                print("Too close to the obstacle, seafloor or water surface!",
-                      obstacle_distance, obs_goal_depthfromwater[3],"\n\n\n")
-            else:
-                reward_obstacle = 0
+        obstacle_distance_vertical = np.min([obs_img_ray[1][27], obs_img_ray[1][29]]) * 10 * 0.1
+        if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3 or obstacle_distance_vertical < 0.15:
+            reward_obstacle = -10
+            done = True
+            print("Too close to the obstacle, seafloor or water surface!",
+                  "horizontal distance to nearest obstacle:", obstacle_distance,
+                  "distance to water surface", np.abs(obs_goal_depthfromwater[3]),
+                  "vertical distance to nearest obstacle:", obstacle_distance_vertical, "\n\n\n")
         else:
-            if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3\
-                    or np.abs(obs_goal_depthfromwater[3]+3) < 0.3:
-                reward_obstacle = -10
-                done = True
-                print("Too close to the obstacle, seafloor or water surface!",
-                      obstacle_distance, obs_goal_depthfromwater[3],"\n\n\n")
-            else:
-                reward_obstacle = 0
+            reward_obstacle = 0
 
         # 2. give a positive reward if the robot reaches the goal
         if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
@@ -367,7 +359,7 @@ class Underwater_navigation():
 #     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
 #     while not done:
 #         cam, goal, ray, action, reward, done, _ = env[0].step([-1, 0.0])
-#         print(action)
+#         print(action, ray)
 #         # cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
 #         # cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
 #         # cam, goal, ray, reward, done, _ = env[3].step([0.0, 0.0])
