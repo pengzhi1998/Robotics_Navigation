@@ -261,7 +261,9 @@ class Underwater_navigation():
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
                              obs_img_ray[1][13]]) * 10 * 0.5
-        obstacle_distance_vertical = np.min([obs_img_ray[1][27], obs_img_ray[1][29]]) * 10 * 0.1
+        obstacle_distance_vertical = np.min([obs_img_ray[1][47], obs_img_ray[1][45],
+                                             obs_img_ray[1][43], obs_img_ray[1][41],
+                                             obs_img_ray[1][39], obs_img_ray[1][37]]) * 10 * 0.1
         if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.3 or obstacle_distance_vertical < 0.15:
             reward_obstacle = -10
             done = True
