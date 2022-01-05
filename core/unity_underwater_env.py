@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 import time
 import uuid
+import random
 import os
 
 from typing import List
@@ -219,7 +220,8 @@ class Underwater_navigation():
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
         if self.training == False:
-            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
+            visibility = random.uniform(5, 20)
+            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
         else:
             self.pos_info.assign_testpos_visibility([0] * 8 + [20])
 
