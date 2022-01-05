@@ -59,9 +59,9 @@ if torch.cuda.is_available():
 
 """environment"""
 env = []
-# start_goal_pos = [15., -2.5, -15, 0., 270., 0., -20, -1.5, 20] # test0
-# start_goal_pos = [15.0, -3.0, 8.5, 0., 180., 0., -6.67, -1.97, -3.45] # test1
-start_goal_pos = [12.91, -3.42, 2.76, 0., 270., 0., -6.67, -1.97, -3.45] # test2
+start_goal_pos = [15., -2.5, -15, 0., 270., 0., -20, -1.5, 20] # test0
+# start_goal_pos = [12.91, -3.42, 2.76, 0., 270., 0., -6.67, -1.97, -3.45] # test1
+# start_goal_pos = [12.91, -3.42, 2.76, 0., 270., 0., -6.67, -1.97, -3.45] # test2
 for i in range(args.num_threads):
     env.append(Underwater_navigation(i, args.hist_length,
                                      start_goal_pos, False))

@@ -221,7 +221,7 @@ class Underwater_navigation():
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
         if self.training == False:
             visibility = random.uniform(5, 20)
-            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
+            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
         else:
             self.pos_info.assign_testpos_visibility([0] * 8 + [20])
 
