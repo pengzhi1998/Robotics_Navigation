@@ -213,12 +213,6 @@ class Underwater_navigation():
 
     def reset(self):
         self.step_count = 0
-        obs_img_ray = self.env.reset()
-
-        # observations per frame
-        obs_preddepth = 1 - self.dpt.run(obs_img_ray[0])
-        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
-        obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
         if self.training == False:
             visibility = random.uniform(5, 25)
             self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
@@ -226,6 +220,14 @@ class Underwater_navigation():
             visibility = random.uniform(5, 25)
             self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
 
+        # waiting for the initialization
+        self.env.reset()
+        obs_img_ray, _, done, _ = self.env.step([0, 0])
+
+        # observations per frame
+        obs_preddepth = 1 - self.dpt.run(obs_img_ray[0] ** 0.45)
+        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
+        obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
@@ -238,6 +240,9 @@ class Underwater_navigation():
         self.obs_actions = np.array([[0, 0]] * self.HIST)
         self.init_area_pos_z = obs_goal_depthfromwater[4]
 
+        # cv2.imwrite("img_rgb_reset.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
+        # cv2.imwrite("img_depth_pred_reset.png", 256 * self.obs_preddepths[0])
+
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions
 
     def step(self, action):
@@ -248,7 +253,7 @@ class Underwater_navigation():
 
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
-        obs_preddepth = self.dpt.run(obs_img_ray[0])
+        obs_preddepth = 1 - self.dpt.run(obs_img_ray[0] ** 0.45)
         obs_ray = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
@@ -343,8 +348,8 @@ class Underwater_navigation():
         print("execution_time:", self.time_after - self.time_before)
         # print("ray:", obs_ray)
 
-        # cv2.imwrite("img_rgb.png", 512 * cv2.cvtColor(obs_img_ray[0], cv2.COLOR_RGB2BGR))
-        # cv2.imwrite("img_depth_pred.png", 256 * self.obs_preddepths[0])
+        # cv2.imwrite("img_rgb_step.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
+        # cv2.imwrite("img_depth_pred_step.png", 256 * self.obs_preddepths[0])
 
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, reward, done, 0
 
@@ -360,8 +365,7 @@ class Underwater_navigation():
 #     # cam, goal, ray = env[2].reset()
 #     # cam, goal, ray = env[3].reset()
 #     # cam, goal, ray = env2.reset()
-#     # print(a, ray)
-#     # cv2.imwrite("img1.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+#     print(a, ray)
 #     while not done:
 #         cam, goal, ray, action, reward, done, _ = env[0].step([-1, 0.0])
 #         print(action, ray)
