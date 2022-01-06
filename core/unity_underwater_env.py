@@ -198,12 +198,12 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test0",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5000+rank)
 
         if self.randomization == True:
             if self.training == False:
-                visibility = random.uniform(3, 30)
+                visibility = 3.5 * (10 ** random.uniform(0, 1))
                 if start_goal_pos == None:
                     raise AssertionError
                 self.start_goal_pos = start_goal_pos
@@ -224,10 +224,10 @@ class Underwater_navigation():
         self.step_count = 0
         if self.randomization == True:
             if self.training == False:
-                visibility = random.uniform(3, 30)
+                visibility = 3.5 * (10 ** random.uniform(0, 1))
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
             else:
-                visibility = random.uniform(3, 30)
+                visibility = 3.5 * (10 ** random.uniform(0, 1))
                 self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
             if self.training == False:
