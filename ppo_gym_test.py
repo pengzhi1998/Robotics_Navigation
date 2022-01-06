@@ -48,6 +48,7 @@ parser.add_argument('--start-goal-pos', type=list, default=[8., -2., -0.376, 0.,
                     metavar='N', help="during testing, what are the initial positions, orientations for the"
                                       "robot and the initial positions for the goal point")
 parser.add_argument('--gpu-index', type=int, default=0, metavar='N')
+parser.add_argument('--randomization', default=True, metavar='N')
 args = parser.parse_args()
 
 """device"""
@@ -63,7 +64,7 @@ start_goal_pos = [15., -2.5, -15, 0., 270., 0., -20, -1.5, 20] # test0
 # start_goal_pos = [12.91, -3.42, 2.76, 0., 270., 0., -6.67, -1.97, -3.45] # test1
 # start_goal_pos = [12.91, -3.42, 2.76, 0., 270., 0., -6.67, -1.97, -3.45] # test2
 for i in range(args.num_threads):
-    env.append(Underwater_navigation(i, args.hist_length,
+    env.append(Underwater_navigation(args.randomization, i, args.hist_length,
                                      start_goal_pos, False))
 img_depth_dim = env[0].observation_space_img_depth
 goal_dim = env[0].observation_space_goal

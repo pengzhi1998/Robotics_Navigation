@@ -181,8 +181,10 @@ class PosChannel(SideChannel):
         super().queue_message_to_send(msg)
 
 class Underwater_navigation():
-    def __init__(self, rank, HIST, start_goal_pos=None, training=True):
+    def __init__(self, randomization, rank, HIST, start_goal_pos=None, training=True):
+        self.randomization = randomization
         self.HIST = HIST
+        self.training = training
         self.twist_range = 30 # degree
         self.vertical_range = 0.1
         self.action_space = spaces.Box(
@@ -196,15 +198,22 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test0",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5000+rank)
 
-        self.training = training
-        if self.training == False:
-            if start_goal_pos == None:
-                raise AssertionError
-            self.start_goal_pos = start_goal_pos
-            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
+        if self.randomization == True:
+            if self.training == False:
+                visibility = random.uniform(3, 30)
+                if start_goal_pos == None:
+                    raise AssertionError
+                self.start_goal_pos = start_goal_pos
+                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
+        else:
+            if self.training == False:
+                if start_goal_pos == None:
+                    raise AssertionError
+                self.start_goal_pos = start_goal_pos
+                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
 
         config_channel.set_configuration_parameters(time_scale=10, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
@@ -213,12 +222,18 @@ class Underwater_navigation():
 
     def reset(self):
         self.step_count = 0
-        if self.training == False:
-            visibility = random.uniform(5, 25)
-            self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
+        if self.randomization == True:
+            if self.training == False:
+                visibility = random.uniform(3, 30)
+                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
+            else:
+                visibility = random.uniform(3, 30)
+                self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
-            visibility = random.uniform(5, 25)
-            self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
+            if self.training == False:
+                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
+            else:
+                self.pos_info.assign_testpos_visibility([0] * 9 + [20])
 
         # waiting for the initialization
         self.env.reset()
@@ -276,9 +291,9 @@ class Underwater_navigation():
             reward_obstacle = -10
             done = True
             print("Too close to the obstacle, seafloor or water surface!",
-                  "horizontal distance to nearest obstacle:", obstacle_distance,
-                  "distance to water surface", np.abs(obs_goal_depthfromwater[3]),
-                  "vertical distance to nearest obstacle:", obstacle_distance_vertical, "\n\n\n")
+                  "\nhorizontal distance to nearest obstacle:", obstacle_distance,
+                  "\ndistance to water surface", np.abs(obs_goal_depthfromwater[3]),
+                  "\nvertical distance to nearest obstacle:", obstacle_distance_vertical, "\n\n\n")
         else:
             reward_obstacle = 0
 
