@@ -60,7 +60,6 @@ if torch.cuda.is_available():
 
 """environment"""
 env = []
-print(args.randomization, "\n\n\n\n\n\n")
 for i in range(args.num_threads):
     env.append(Underwater_navigation(args.randomization, i, args.hist_length))
 img_depth_dim = env[0].observation_space_img_depth
