@@ -40,7 +40,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         if running_state is not None:
             # print "before", img_depth.shape, goal.shape, img_depth.dtype
             # print "first_depth_before:", np.max(img_depth), "first_goal_before:", np.max(goal)
-            print(np.shape(img_depth), np.shape(goal), np.shape(ray), np.shape(hist_action), "\n\n\n")
+            # print(np.shape(img_depth), np.shape(goal), np.shape(ray), np.shape(hist_action), "\n\n\n")
             _, goal, ray = running_state(img_depth, goal, ray)
             img_depth = np.float64((img_depth - 0.5) / 0.5) # the predicted depth ranges from 0 - 1
             hist_action = np.float64(hist_action)
@@ -108,7 +108,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         # print "num_steps:", num_steps
         num_episodes += 1
         total_reward += reward_episode
-        print("reward for one episode", reward_episode)
+        print("reward for one episode", reward_episode, "\n")
         min_reward = min(min_reward, reward_episode)
         max_reward = max(max_reward, reward_episode)
 

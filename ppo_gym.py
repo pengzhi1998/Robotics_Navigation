@@ -151,7 +151,10 @@ def main_loop():
                 '{}\tT_sample {:.4f}\tT_update {:.4f}\tT_eval {:.4f}\ttrain_R_min {:.2f}\ttrain_R_max {:.2f}\ttrain_R_avg {:.2f}\t'.format(
                     i_iter, log['sample_time'], t1 - t0, t2 - t1, log['min_reward'], log['max_reward'], log['avg_reward']))
 
-        my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo.txt'.format(args.env_name)), "a")
+        if args.randomization == True:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand.txt'.format(args.env_name)), "a")
+        else:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand.txt'.format(args.env_name)), "a")
         data = [str(i_iter), " ", str(log['avg_reward']), " ", str(log['num_episodes']),
                 " ", str(log['ratio_success']), " ", str(log['avg_steps_success']), " ", str(log['avg_last_reward']), "\n"]
         for element in data:
@@ -160,15 +163,17 @@ def main_loop():
 
         if args.save_model_interval > 0 and (i_iter+1) % args.save_model_interval == 0:
             to_device(torch.device('cpu'), policy_net, value_net)
-            pickle.dump((policy_net, value_net, running_state),
-                        open(os.path.join(assets_dir(), 'learned_models/{}_ppo.p'.format(args.env_name)), 'wb'))
+            if args.randomization == True:
+                pickle.dump((policy_net, value_net, running_state),
+                        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand.p'.format(args.env_name)), 'wb'))
+            else:
+                pickle.dump((policy_net, value_net, running_state),
+                        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand.p'.format(args.env_name)), 'wb'))
             to_device(device, policy_net, value_net)
 
         """clean up gpu memory"""
         torch.cuda.empty_cache()
 
 if __name__ == '__main__':
-    print("a")
     torch.multiprocessing.set_start_method('spawn')
-    print("b")
     main_loop()

@@ -245,7 +245,7 @@ class Underwater_navigation():
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
-        print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
+        # print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
         self.obs_preddepths = np.array([obs_preddepth.tolist()] * self.HIST) # torch.Size([1, 4, 128, 160])
         # self.obs_preddepths_buffer = np.array([obs_preddepth.tolist()] * (2 ** (self.HIST - 1)))
         self.obs_goals = np.array([obs_goal_depthfromwater[:3].tolist()] * self.HIST)
@@ -293,7 +293,7 @@ class Underwater_navigation():
             print("Too close to the obstacle, seafloor or water surface!",
                   "\nhorizontal distance to nearest obstacle:", obstacle_distance,
                   "\ndistance to water surface", np.abs(obs_goal_depthfromwater[3]),
-                  "\nvertical distance to nearest obstacle:", obstacle_distance_vertical, "\n\n\n")
+                  "\nvertical distance to nearest obstacle:", obstacle_distance_vertical)
         else:
             reward_obstacle = 0
 
@@ -301,7 +301,7 @@ class Underwater_navigation():
         if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
             reward_goal_reached = 10 - 7.5 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2])) / 2
             done = True
-            print("Reached the goal area!\n\n\n")
+            print("Reached the goal area!")
         else:
             reward_goal_reached = 0
 
@@ -309,7 +309,7 @@ class Underwater_navigation():
         reward_goal_reaching_horizontal = (-np.abs(np.deg2rad(obs_goal_depthfromwater[2])) + np.pi / 3) / 10
         if (obs_goal_depthfromwater[1] > 0 and action_ver > 0) or\
                 (obs_goal_depthfromwater[1] < 0 and action_ver < 0):
-            reward_goal_reaching_vertical = np.abs(action_ver) 
+            reward_goal_reaching_vertical = np.abs(action_ver)
             # print("reaching the goal vertically", obs_goal_depthfromwater[1], action_ver)
         else:
             reward_goal_reaching_vertical = - np.abs(action_ver)
@@ -327,7 +327,7 @@ class Underwater_navigation():
 
         if self.step_count > 500:
             done = True
-            print("Exceeds the max num_step...\n\n\n")
+            print("Exceeds the max num_step...")
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         obs_preddepth = np.reshape(obs_preddepth, (1, DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH))
@@ -360,7 +360,7 @@ class Underwater_navigation():
         self.obs_actions = np.append(obs_action, self.obs_actions[:(self.HIST - 1), :], axis=0)
 
         self.time_after = time.time()
-        print("execution_time:", self.time_after - self.time_before)
+        # print("execution_time:", self.time_after - self.time_before)
         # print("ray:", obs_ray)
 
         # cv2.imwrite("img_rgb_step.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
