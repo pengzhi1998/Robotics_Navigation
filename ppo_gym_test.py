@@ -71,10 +71,15 @@ goal_dim = env[0].observation_space_goal
 ray_dim = env[0].observation_space_ray
 
 """define actor and critic"""
-policy_net, value_net, running_state = pickle.load(
-open(os.path.join(assets_dir(), 'learned_models/{}_ppo_{}.p'.format(args.env_name,
-                                                                      args.hist_length)), "rb")
-)
+if args.randomization == True:
+    policy_net, value_net, running_state = pickle.load(
+        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand.p'.format(args.env_name,
+                                                                      args.hist_length)), "rb"))
+else:
+    policy_net, value_net, running_state = pickle.load(
+        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand.p'.format(args.env_name,
+                                                                              args.hist_length)), "rb"))
+
 policy_net.to(device)
 
 """create agent"""

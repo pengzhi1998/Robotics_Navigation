@@ -298,12 +298,20 @@ class Underwater_navigation():
             reward_obstacle = 0
 
         # 2. give a positive reward if the robot reaches the goal
-        if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
-            reward_goal_reached = 10 - 7.5 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2])) / 2
-            done = True
-            print("Reached the goal area!")
+        if self.training:
+            if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
+                reward_goal_reached = 10 - 7.5 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2])) / 2
+                done = True
+                print("Reached the goal area!")
+            else:
+                reward_goal_reached = 0
         else:
-            reward_goal_reached = 0
+            if obs_goal_depthfromwater[0] < 0.6 and np.abs(obs_goal_depthfromwater[1]) <0.3:
+                reward_goal_reached = 10 - 7.5 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2])) / 2
+                done = True
+                print("Reached the goal area!")
+            else:
+                reward_goal_reached = 0
 
         # 3. give a positive reward if the robot is reaching the goal
         reward_goal_reaching_horizontal = (-np.abs(np.deg2rad(obs_goal_depthfromwater[2])) + np.pi / 3) / 10
