@@ -374,6 +374,7 @@ class Underwater_navigation():
 
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, reward, done, 0
 
+'''
 env = []
 for i in range(1):
     env.append(Underwater_navigation(True, i, 4))
@@ -397,4 +398,4 @@ while True:
         # print(a, ray)
         a += 1
         # print(obs[1], np.shape(obs[1]))
-        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
+        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))'''
