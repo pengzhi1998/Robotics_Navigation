@@ -374,28 +374,27 @@ class Underwater_navigation():
 
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, reward, done, 0
 
-'''
-env = []
-for i in range(1):
-    env.append(Underwater_navigation(True, i, 4))
-
-while True:
-    a = 0
-    done = False
-    cam, goal, ray, action = env[0].reset()
-    # cam, goal, ray = env[1].reset()
-    # cam, goal, ray = env[2].reset()
-    # cam, goal, ray = env[3].reset()
-    # cam, goal, ray = env2.reset()
-    print(a, ray)
-    while not done:
-        cam, goal, ray, action, reward, done, _ = env[0].step([-1, 0.0])
-        print(action, ray)
-        # cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
-        # cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
-        # cam, goal, ray, reward, done, _ = env[3].step([0.0, 0.0])
-        # cam, goal, ray, reward, done, _ = env2.step([0.0, 0.0])
-        # print(a, ray)
-        a += 1
-        # print(obs[1], np.shape(obs[1]))
-        # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))'''
+# env = []
+# for i in range(1):
+#     env.append(Underwater_navigation(True, i, 4))
+#
+# while True:
+#     a = 0
+#     done = False
+#     cam, goal, ray, action = env[0].reset()
+#     # cam, goal, ray = env[1].reset()
+#     # cam, goal, ray = env[2].reset()
+#     # cam, goal, ray = env[3].reset()
+#     # cam, goal, ray = env2.reset()
+#     print(a, ray)
+#     while not done:
+#         cam, goal, ray, action, reward, done, _ = env[0].step([-1, 0.0])
+#         print(action, ray)
+#         # cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
+#         # cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
+#         # cam, goal, ray, reward, done, _ = env[3].step([0.0, 0.0])
+#         # cam, goal, ray, reward, done, _ = env2.step([0.0, 0.0])
+#         # print(a, ray)
+#         a += 1
+#         # print(obs[1], np.shape(obs[1]))
+#         # cv2.imwrite("img2.png", 256 * cv2.cvtColor(obs[0], cv2.COLOR_RGB2BGR))
