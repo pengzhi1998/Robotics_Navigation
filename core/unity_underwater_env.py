@@ -179,7 +179,10 @@ class PosChannel(SideChannel):
         super().queue_message_to_send(msg)
 
 class Underwater_navigation():
-    def __init__(self, randomization, rank, HIST, start_goal_pos=None, training=True):
+    def __init__(self, adaptation, randomization, rank, HIST, start_goal_pos=None, training=True):
+        if adaptation and not randomization:
+            raise Exception("Adaptation should be used with domain randomization during training")
+        self.adaptation = adaptation
         self.randomization = randomization
         self.HIST = HIST
         self.training = training
@@ -221,24 +224,27 @@ class Underwater_navigation():
     def reset(self):
         self.step_count = 0
         if self.randomization == True:
+            visibility_para = random.uniform(-1, 1)
+            visibility = 3.5 * (10 ** ((visibility_para + 1)/2))
+            self.visibility_para_Gaussian = np.clip(np.random.normal(visibility_para, 0.02, 1), -1, 1)
             if self.training == False:
-                visibility = 3.5 * (10 ** random.uniform(0, 1))
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
             else:
-                visibility = 3.5 * (10 ** random.uniform(0, 1))
                 self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
+            visibility = 20
+            self.visibility_para_Gaussian = np.array([0])
             if self.training == False:
-                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
+                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
             else:
-                self.pos_info.assign_testpos_visibility([0] * 9 + [20])
+                self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
 
         # waiting for the initialization
         self.env.reset()
         obs_img_ray, _, done, _ = self.env.step([0, 0])
 
         # observations per frame
-        obs_preddepth = 1 - self.dpt.run(obs_img_ray[0] ** 0.45)
+        obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
@@ -248,7 +254,10 @@ class Underwater_navigation():
         # self.obs_preddepths_buffer = np.array([obs_preddepth.tolist()] * (2 ** (self.HIST - 1)))
         self.obs_goals = np.array([obs_goal_depthfromwater[:3].tolist()] * self.HIST)
         # self.obs_goals_buffer = np.array([obs_goal_depthfromwater[:3].tolist()] * (2 ** (self.HIST - 1)))
-        self.obs_rays = np.array([obs_ray.tolist()] * self.HIST)
+        if self.adaptation == True:
+            self.obs_rays = np.array([np.hstack((obs_ray, self.visibility_para_Gaussian)).tolist()] * self.HIST)
+        else:
+            self.obs_rays = np.array([obs_ray.tolist() + [0]] * self.HIST)
         # self.obs_rays_buffer = np.array([obs_ray.tolist()] * (2 ** (self.HIST - 1)))
         self.obs_actions = np.array([[0, 0]] * self.HIST)
         self.init_area_pos_z = obs_goal_depthfromwater[4]
@@ -266,8 +275,11 @@ class Underwater_navigation():
 
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
-        obs_preddepth = 1 - self.dpt.run(obs_img_ray[0] ** 0.45)
-        obs_ray = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5
+        obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
+        if self.adaptation == True:
+            obs_ray = [np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5] + self.visibility_para_Gaussian.tolist()
+        else:
+            obs_ray = [np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5] + [0]
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
         """
@@ -342,7 +354,7 @@ class Underwater_navigation():
         obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
         self.obs_goals = np.append(obs_goal, self.obs_goals[:(self.HIST - 1), :], axis=0)
 
-        obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar
+        obs_ray = np.reshape(np.array(obs_ray), (1, 2))  # single beam sonar and adaptation representation
         self.obs_rays = np.append(obs_ray, self.obs_rays[:(self.HIST - 1), :], axis=0)
 
         # # construct the observations of depth images, goal infos, and rays for consecutive 4 frames

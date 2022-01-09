@@ -49,7 +49,8 @@ parser.add_argument('--log-interval', type=int, default=1, metavar='N',
 parser.add_argument('--save-model-interval', type=int, default=0, metavar='N',
                     help="interval between saving model (default: 0, means don't save)")
 parser.add_argument('--gpu-index', type=int, default=0, metavar='N')
-parser.add_argument('--randomization', default=True, metavar='N')
+parser.add_argument('--randomization', type=int, default=1, metavar='N')
+parser.add_argument('--adaptation', type=int, default=1, metavar='N')
 args = parser.parse_args()
 
 dtype = torch.float64
@@ -61,7 +62,7 @@ if torch.cuda.is_available():
 """environment"""
 env = []
 for i in range(args.num_threads):
-    env.append(Underwater_navigation(args.randomization, i, args.hist_length))
+    env.append(Underwater_navigation(args.adaptation, args.randomization, i, args.hist_length))
 img_depth_dim = env[0].observation_space_img_depth
 goal_dim = env[0].observation_space_goal
 ray_dim = env[0].observation_space_ray

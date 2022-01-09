@@ -13,12 +13,12 @@ class Value(nn.Module):
 
         """ layers for inputs of goals """
         self.fc_goal = nn.Linear(HIST * 3, 96)
-        self.fc_ray = nn.Linear(HIST * 1, 32)
+        self.fc_ray = nn.Linear(HIST * 2, 64)
         self.fc_action = nn.Linear(HIST * 2, 64)
 
         """ layers for inputs concatenated information """
-        self.img_goal_ray1 = nn.Linear(704, 512)
-        self.img_goal_ray2 = nn.Linear(512, 1)  # two dimensions of actions: upward and downward; turning
+        self.img_goal_ray1 = nn.Linear(736, 512)
+        self.img_goal_ray2 = nn.Linear(576, 1)  # two dimensions of actions: upward and downward; turning
 
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
@@ -43,6 +43,7 @@ class Value(nn.Module):
 
         img_goal_ray_aciton = torch.cat((depth_img, goal, ray, hist_action), 1)
         img_goal_ray_aciton = self.relu(self.img_goal_ray1(img_goal_ray_aciton))
+        img_goal_ray_aciton = torch.cat((img_goal_ray_aciton, ray), 1)
         value = self.tanh(self.img_goal_ray2(img_goal_ray_aciton))
 
         return value
