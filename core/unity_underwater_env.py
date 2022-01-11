@@ -204,7 +204,7 @@ class Underwater_navigation():
 
         if self.randomization == True:
             if self.training == False:
-                visibility = 3.5 * (10 ** random.uniform(0, 1))
+                visibility = 2 * (20 ** random.uniform(0, 1))
                 if start_goal_pos == None:
                     raise AssertionError
                 self.start_goal_pos = start_goal_pos
@@ -225,7 +225,7 @@ class Underwater_navigation():
         self.step_count = 0
         if self.randomization == True:
             visibility_para = random.uniform(-1, 1)
-            visibility = 3.5 * (10 ** ((visibility_para + 1)/2))
+            visibility = 2 * (20 ** ((visibility_para + 1)/2))
             self.visibility_para_Gaussian = np.clip(np.random.normal(visibility_para, 0.02, 1), -1, 1)
             if self.training == False:
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
@@ -250,17 +250,11 @@ class Underwater_navigation():
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         # print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
-        self.obs_preddepths = np.array([obs_preddepth.tolist()] * self.HIST) # torch.Size([1, 4, 128, 160])
-        # self.obs_preddepths_buffer = np.array([obs_preddepth.tolist()] * (2 ** (self.HIST - 1)))
+        self.obs_preddepths = np.array([obs_preddepth.tolist()] * self.HIST)
         self.obs_goals = np.array([obs_goal_depthfromwater[:3].tolist()] * self.HIST)
-        # self.obs_goals_buffer = np.array([obs_goal_depthfromwater[:3].tolist()] * (2 ** (self.HIST - 1)))
-        if self.adaptation == True:
-            self.obs_rays = np.array([np.hstack((obs_ray, self.visibility_para_Gaussian)).tolist()] * self.HIST)
-        else:
-            self.obs_rays = np.array([obs_ray.tolist() + [0]] * self.HIST)
-        # self.obs_rays_buffer = np.array([obs_ray.tolist()] * (2 ** (self.HIST - 1)))
+        self.obs_rays = np.array([obs_ray.tolist()] * self.HIST)
         self.obs_actions = np.array([[0, 0]] * self.HIST)
-        self.init_area_pos_z = obs_goal_depthfromwater[4]
+        self.obs_visibility = np.reshape(self.visibility_para_Gaussian, [1, 1, 1])
 
         # cv2.imwrite("img_rgb_reset.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_reset.png", 256 * self.obs_preddepths[0])
@@ -276,10 +270,7 @@ class Underwater_navigation():
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
-        if self.adaptation == True:
-            obs_ray = [np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5] + self.visibility_para_Gaussian.tolist()
-        else:
-            obs_ray = [np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5] + [0]
+        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
         """
@@ -309,14 +300,14 @@ class Underwater_navigation():
 
         # 2. give a positive reward if the robot reaches the goal
         if self.training:
-            if obs_goal_depthfromwater[0] < 0.4 and np.abs(obs_goal_depthfromwater[1]) <0.2:
+            if obs_goal_depthfromwater[0] < 0.7 and np.abs(obs_goal_depthfromwater[1]) < 0.35:
                 reward_goal_reached = 10 - 7.5 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2])) / 2
                 done = True
                 print("Reached the goal area!")
             else:
                 reward_goal_reached = 0
         else:
-            if obs_goal_depthfromwater[0] < 0.6 and np.abs(obs_goal_depthfromwater[1]) <0.3:
+            if obs_goal_depthfromwater[0] < 1 and np.abs(obs_goal_depthfromwater[1]) <0.4:
                 reward_goal_reached = 10 - 7.5 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2])) / 2
                 done = True
                 print("Reached the goal area!")
@@ -354,7 +345,7 @@ class Underwater_navigation():
         obs_goal = np.reshape(np.array(obs_goal_depthfromwater[0:3]), (1, DIM_GOAL))
         self.obs_goals = np.append(obs_goal, self.obs_goals[:(self.HIST - 1), :], axis=0)
 
-        obs_ray = np.reshape(np.array(obs_ray), (1, 2))  # single beam sonar and adaptation representation
+        obs_ray = np.reshape(np.array(obs_ray), (1, 1))  # single beam sonar and adaptation representation
         self.obs_rays = np.append(obs_ray, self.obs_rays[:(self.HIST - 1), :], axis=0)
 
         # # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
