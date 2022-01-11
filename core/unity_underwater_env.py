@@ -370,8 +370,8 @@ class Underwater_navigation():
 
         self.time_after = time.time()
         # print("execution_time:", self.time_after - self.time_before)
-        print("goals:", self.obs_goals, "\nrays:", self.obs_rays, "\nactions:",
-              self.obs_actions, "\nvisibility_Gaussian:", self.visibility_para_Gaussian, "\nreward:", reward)
+        # print("goals:", self.obs_goals, "\nrays:", self.obs_rays, "\nactions:",
+        #       self.obs_actions, "\nvisibility_Gaussian:", self.visibility_para_Gaussian, "\nreward:", reward)
 
         # cv2.imwrite("img_rgb_step.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_step.png", 256 * self.obs_preddepths[0])

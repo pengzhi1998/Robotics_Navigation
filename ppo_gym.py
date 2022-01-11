@@ -130,7 +130,7 @@ def update_params(batch, i_iter):
                 actions[ind], advantages[ind], returns[ind], fixed_log_probs[ind]
 
             ppo_step(policy_net, value_net, optimizer_policy, optimizer_value, 1, imgs_depth_b,
-                     goals_b, rays_b, hist_actions_b, actions_b, visibilities_b, returns_b, advantages_b,
+                     goals_b, rays_b, hist_actions_b, visibilities_b, actions_b, returns_b, advantages_b,
                      fixed_log_probs_b, args.clip_epsilon, args.l2_reg)
 
 
