@@ -18,10 +18,11 @@ class Policy(nn.Module):
         self.fc_goal = nn.Linear(HIST * 3, 96)
         self.fc_ray = nn.Linear(HIST * 1, 32)
         self.fc_action = nn.Linear(HIST * 2, 64)
+        self.fc_visibility = nn.Linear(1 * 1, 16)
 
         """ layers for inputs concatenated information """
-        self.img_goal_ray1 = nn.Linear(704, 512)
-        self.img_goal_ray2 = nn.Linear(512, action_dim) # two dimensions of actions: upward and downward; turning
+        self.img_goal_ray1 = nn.Linear(720, 512)
+        self.img_goal_ray2 = nn.Linear(528, action_dim) # two dimensions of actions: upward and downward; turning
 
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
@@ -30,7 +31,7 @@ class Policy(nn.Module):
 
         self.action_log_std = nn.Parameter(torch.ones(1, action_dim) * log_std)
 
-    def forward(self, depth_img, goal, ray, hist_action):
+    def forward(self, depth_img, goal, ray, hist_action, visibility):
         depth_img = self.relu(self.conv1(depth_img))
         depth_img = self.relu(self.conv2(depth_img))
         depth_img = self.relu(self.conv3(depth_img))
@@ -46,9 +47,12 @@ class Policy(nn.Module):
         hist_action = hist_action.view(hist_action.size(0), -1)
         hist_action = self.relu(self.fc_action(hist_action))
 
-        img_goal_ray_aciton = torch.cat((depth_img, goal, ray, hist_action), 1)
+        visibility = visibility.view(visibility.size(0), -1)
+        visibility = self.relu(self.fc_visibility(visibility))
+
+        img_goal_ray_aciton = torch.cat((depth_img, goal, ray, hist_action, visibility), 1)
         img_goal_ray_aciton = self.relu(self.img_goal_ray1(img_goal_ray_aciton))
-        # img_goal_ray_aciton = torch.cat((img_goal_ray_aciton, ray), 1)
+        img_goal_ray_aciton = torch.cat((img_goal_ray_aciton, visibility), 1)
         action_mean = self.tanh(self.img_goal_ray2(img_goal_ray_aciton))
 
         action_log_std = self.action_log_std.expand_as(action_mean)
@@ -56,13 +60,13 @@ class Policy(nn.Module):
 
         return action_mean, action_log_std, action_std
 
-    def select_action(self, depth_img, goal, ray, hist_action):
-        action_mean, _, action_std = self.forward(depth_img, goal, ray, hist_action)
+    def select_action(self, depth_img, goal, ray, hist_action, visibility):
+        action_mean, _, action_std = self.forward(depth_img, goal, ray, hist_action, visibility)
         # print "action:", action_mean, action_std
         action = torch.clamp(torch.normal(action_mean, action_std), -1, 1)
         # print action, "\n\n\n"
         return action
 
-    def get_log_prob(self, depth_img, goal, ray, hist_action, actions):
-        action_mean, action_log_std, action_std = self.forward(depth_img, goal, ray, hist_action)
+    def get_log_prob(self, depth_img, goal, ray, hist_action, visibility, actions):
+        action_mean, action_log_std, action_std = self.forward(depth_img, goal, ray, hist_action, visibility)
         return normal_log_density(actions, action_mean, action_log_std, action_std)
