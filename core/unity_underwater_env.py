@@ -245,7 +245,8 @@ class Underwater_navigation():
 
         # observations per frame
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
-        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
+        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
+                                    obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
@@ -270,7 +271,8 @@ class Underwater_navigation():
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
-        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5]]) * 10 * 0.5])
+        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
+                                    obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
         """
@@ -284,10 +286,10 @@ class Underwater_navigation():
         # 1. give a negative reward when robot is too close to nearby obstacles, seafloor or the water surface
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
-                             obs_img_ray[1][13]]) * 10 * 0.5
-        obstacle_distance_vertical = np.min([obs_img_ray[1][47], obs_img_ray[1][45],
-                                             obs_img_ray[1][43], obs_img_ray[1][41],
-                                             obs_img_ray[1][39], obs_img_ray[1][37]]) * 10 * 0.1
+                             obs_img_ray[1][13], obs_img_ray[1][15], obs_img_ray[1][17]]) * 8 * 0.5
+        obstacle_distance_vertical = np.min([obs_img_ray[1][59], obs_img_ray[1][57],
+                                             obs_img_ray[1][55], obs_img_ray[1][53],
+                                             obs_img_ray[1][51], obs_img_ray[1][49]]) * 8 * 0.5
         if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.25 or obstacle_distance_vertical < 0.12:
             reward_obstacle = -10
             done = True
