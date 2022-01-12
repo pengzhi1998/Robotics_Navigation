@@ -204,7 +204,7 @@ class Underwater_navigation():
 
         if self.randomization == True:
             if self.training == False:
-                visibility = 2 * (20 ** random.uniform(0, 1))
+                visibility = 3 * (13 ** random.uniform(0, 1))
                 if start_goal_pos == None:
                     raise AssertionError
                 self.start_goal_pos = start_goal_pos
@@ -225,7 +225,7 @@ class Underwater_navigation():
         self.step_count = 0
         if self.randomization == True:
             visibility_para = random.uniform(-1, 1)
-            visibility = 2 * (20 ** ((visibility_para + 1)/2))
+            visibility = 3 * (13 ** ((visibility_para + 1)/2))
             self.visibility_para_Gaussian = np.clip(np.random.normal(visibility_para, 0.02, 1), -1, 1)
             if self.training == False:
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
