@@ -287,10 +287,10 @@ class Underwater_navigation():
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                              obs_img_ray[1][7], obs_img_ray[1][9], obs_img_ray[1][11],
                              obs_img_ray[1][13], obs_img_ray[1][15], obs_img_ray[1][17]]) * 8 * 0.5
-        obstacle_distance_vertical = np.min([obs_img_ray[1][59], obs_img_ray[1][57],
-                                             obs_img_ray[1][55], obs_img_ray[1][53],
-                                             obs_img_ray[1][51], obs_img_ray[1][49]]) * 8 * 0.5
-        if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.25 or obstacle_distance_vertical < 0.12:
+        obstacle_distance_vertical = np.min([obs_img_ray[1][81], obs_img_ray[1][79],
+                                             obs_img_ray[1][77], obs_img_ray[1][75],
+                                             obs_img_ray[1][73], obs_img_ray[1][71]]) * 8 * 0.5
+        if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.24 or obstacle_distance_vertical < 0.12:
             reward_obstacle = -10
             done = True
             print("Too close to the obstacle, seafloor or water surface!",
@@ -383,19 +383,19 @@ class Underwater_navigation():
 
 # env = []
 # for i in range(1):
-#     env.append(Underwater_navigation(True, i, 4))
+#     env.append(Underwater_navigation(True, True, i, 4))
 #
 # while True:
 #     a = 0
 #     done = False
-#     cam, goal, ray, action = env[0].reset()
+#     cam, goal, ray, action, visibility = env[0].reset()
 #     # cam, goal, ray = env[1].reset()
 #     # cam, goal, ray = env[2].reset()
 #     # cam, goal, ray = env[3].reset()
 #     # cam, goal, ray = env2.reset()
 #     print(a, ray)
 #     while not done:
-#         cam, goal, ray, action, reward, done, _ = env[0].step([-1, 0.0])
+#         cam, goal, ray, action, visibility, reward, done, _ = env[0].step([0, 0.0])
 #         print(action, ray)
 #         # cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
 #         # cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
