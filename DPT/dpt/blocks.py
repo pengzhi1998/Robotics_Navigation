@@ -57,6 +57,9 @@ def _make_encoder(
         scratch = _make_scratch(
             [256, 512, 1024, 2048], features, groups=groups, expand=expand
         )  # efficientnet_lite3
+    elif backbone == "efficientnet_lite3":
+        pretrained = _make_pretrained_efficientnet_lite3(use_pretrained, exportable=exportable)
+        scratch = _make_scratch([32, 48, 136, 384], features, groups=groups, expand=expand)  # efficientnet_lite3
     else:
         print(f"Backbone '{backbone}' not implemented")
         assert False
@@ -133,6 +136,27 @@ def _make_resnet_backbone(resnet):
 def _make_pretrained_resnext101_wsl(use_pretrained):
     resnet = torch.hub.load("facebookresearch/WSL-Images", "resnext101_32x8d_wsl")
     return _make_resnet_backbone(resnet)
+
+def _make_efficientnet_backbone(effnet):
+    pretrained = nn.Module()
+
+    pretrained.layer1 = nn.Sequential(
+        effnet.conv_stem, effnet.bn1, effnet.act1, *effnet.blocks[0:2]
+    )
+    pretrained.layer2 = nn.Sequential(*effnet.blocks[2:3])
+    pretrained.layer3 = nn.Sequential(*effnet.blocks[3:5])
+    pretrained.layer4 = nn.Sequential(*effnet.blocks[5:9])
+
+    return pretrained
+
+def _make_pretrained_efficientnet_lite3(use_pretrained, exportable=False):
+    efficientnet = torch.hub.load(
+        "rwightman/gen-efficientnet-pytorch",
+        "tf_efficientnet_lite3",
+        pretrained=use_pretrained,
+        exportable=exportable
+    )
+    return _make_efficientnet_backbone(efficientnet)
 
 
 class Interpolate(nn.Module):

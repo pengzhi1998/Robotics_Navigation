@@ -20,6 +20,7 @@ from mlagents_envs.side_channel.engine_configuration_channel import EngineConfig
 from torchvision.transforms import Compose
 from DPT.dpt.models import DPTDepthModel
 from DPT.dpt.midas_net import MidasNet_large
+from DPT.dpt.midas_net_custom import MidasNet_small
 from DPT.dpt.transforms import Resize, NormalizeImage, PrepareForNet
 
 DEPTH_IMAGE_WIDTH = 160
@@ -38,6 +39,7 @@ class DPT_depth():
         # load network
         if model_type == "dpt_large":  # DPT-Large
             self.net_w = self.net_h = 384
+            resize_mode = "minimal"
             self.model = DPTDepthModel(
                 path=model_path,
                 backbone="vitl16_384",
@@ -48,6 +50,7 @@ class DPT_depth():
 
         elif model_type == "dpt_hybrid":  # DPT-Hybrid
             self.net_w = self.net_h = 384
+            resize_mode = "minimal"
             self.model = DPTDepthModel(
                 path=model_path,
                 backbone="vitb_rn50_384",
@@ -58,6 +61,7 @@ class DPT_depth():
         elif model_type == "dpt_hybrid_kitti":
             self.net_w = 1216
             self.net_h = 352
+            resize_mode = "minimal"
 
             self.model = DPTDepthModel(
                 path=model_path,
@@ -74,6 +78,7 @@ class DPT_depth():
         elif model_type == "dpt_hybrid_nyu":
             self.net_w = 640
             self.net_h = 480
+            resize_mode = "minimal"
 
             self.model = DPTDepthModel(
                 path=model_path,
@@ -90,7 +95,17 @@ class DPT_depth():
         elif model_type == "midas_v21":  # Convolutional model
             self.net_w = self.net_h = 384
 
+            resize_mode = "upper_bound"
             self.model = MidasNet_large(model_path, non_negative=True)
+            self.normalization = NormalizeImage(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+            )
+
+        elif model_type == "midas_v21_small":
+            self.net_w = self.net_h = 256
+            resize_mode = "upper_bound"
+            self.model = MidasNet_small(model_path, non_negative=True)
+
             self.normalization = NormalizeImage(
                 mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
             )
@@ -111,7 +126,7 @@ class DPT_depth():
                     resize_target=None,
                     keep_aspect_ratio=True,
                     ensure_multiple_of=32,
-                    resize_method="minimal",
+                    resize_method=resize_mode,
                     image_interpolation_method=cv2.INTER_CUBIC,
                 ),
                 self.normalization,
@@ -156,7 +171,7 @@ class DPT_depth():
             # plt.imshow(np.uint16(prediction * 65536))
             # plt.show()
 
-            # cv2.imwrite("depth.png", ((prediction_show*65536).astype("uint16")), [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        # cv2.imwrite("depth.png", ((prediction*65536).astype("uint16")), [cv2.IMWRITE_PNG_COMPRESSION, 0])
         return prediction
 
 class PosChannel(SideChannel):
@@ -179,7 +194,7 @@ class PosChannel(SideChannel):
         super().queue_message_to_send(msg)
 
 class Underwater_navigation():
-    def __init__(self, adaptation, randomization, rank, HIST, start_goal_pos=None, training=True):
+    def __init__(self, depth_prediction_model, adaptation, randomization, rank, HIST, start_goal_pos=None, training=True):
         if adaptation and not randomization:
             raise Exception("Adaptation should be used with domain randomization during training")
         self.adaptation = adaptation
@@ -219,18 +234,32 @@ class Underwater_navigation():
         config_channel.set_configuration_parameters(time_scale=10, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
 
-        self.dpt = DPT_depth(self.device)
+        if depth_prediction_model == "dpt":
+            self.dpt = DPT_depth(self.device, model_type="dpt_large", model_path=
+            os.path.abspath("./") + "/DPT/weights/dpt_large-midas-2f21e586.pt")
+        elif depth_prediction_model == "midas":
+            self.dpt = DPT_depth(self.device, model_type="midas_v21_small", model_path=
+            os.path.abspath("./") + "/DPT/weights/midas_v21_small-70d6b9c8.pt")
 
     def reset(self):
         self.step_count = 0
         if self.randomization == True:
-            visibility_para = random.uniform(-1, 1)
-            visibility = 3 * (13 ** ((visibility_para + 1)/2))
-            self.visibility_para_Gaussian = np.clip(np.random.normal(visibility_para, 0.02, 1), -1, 1)
-            if self.training == False:
-                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
+            if self.adaptation == True:
+                visibility_para = random.uniform(-1, 1)
+                visibility = 3 * (13 ** ((visibility_para + 1)/2))
+                self.visibility_para_Gaussian = np.clip(np.random.normal(visibility_para, 0.02, 1), -1, 1)
+                if self.training == False:
+                    self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
+                else:
+                    self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
             else:
-                self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
+                visibility_para = random.uniform(-1, 1)
+                visibility = 3 * (13 ** ((visibility_para + 1) / 2))
+                self.visibility_para_Gaussian = np.array([0])
+                if self.training == False:
+                    self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
+                else:
+                    self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
             visibility = 20
             self.visibility_para_Gaussian = np.array([0])
@@ -327,7 +356,7 @@ class Underwater_navigation():
             # print("being away from the goal vertically", obs_goal_depthfromwater[1], action_ver)
 
         # 4. give negative rewards if the robot too often turns its direction or is near any obstacle
-        reward_turning = - np.abs(action_rot) / 600
+        reward_turning = 0
         if 0.5 <= obstacle_distance < 1.:
             reward_goal_reaching_horizontal *= (obstacle_distance - 0.5) / 0.5
             reward_obstacle -= (1 - obstacle_distance) * 2
@@ -335,6 +364,7 @@ class Underwater_navigation():
         reward = reward_obstacle + reward_goal_reached + \
                  reward_goal_reaching_horizontal + reward_goal_reaching_vertical + reward_turning
         self.step_count += 1
+        # print(self.step_count)
 
         if self.step_count > 500:
             done = True
