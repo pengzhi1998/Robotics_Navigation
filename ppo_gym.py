@@ -45,7 +45,7 @@ parser.add_argument('--min-batch-size', type=int, default=2048, metavar='N',
                     help='minimal batch size per PPO update (default: 2048)')
 parser.add_argument('--eval-batch-size', type=int, default=2048, metavar='N',
                     help='minimal batch size for evaluation (default: 2048)')
-parser.add_argument('--max-iter-num', type=int, default=500, metavar='N',
+parser.add_argument('--max-iter-num', type=int, default=200, metavar='N',
                     help='maximal number of main iterations (default: 500)')
 parser.add_argument('--log-interval', type=int, default=1, metavar='N',
                     help='interval between training status logs (default: 10)')
@@ -156,8 +156,11 @@ def main_loop():
                 '{}\tT_sample {:.4f}\tT_update {:.4f}\tT_eval {:.4f}\ttrain_R_min {:.2f}\ttrain_R_max {:.2f}\ttrain_R_avg {:.2f}\t'.format(
                     i_iter, log['sample_time'], t1 - t0, t2 - t1, log['min_reward'], log['max_reward'], log['avg_reward']))
 
-        if args.randomization == True:
-            my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand.txt'.format(args.env_name)), "a")
+        if args.randomization == 1:
+            if args.adaptation == 1:
+                my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo_adapt.txt'.format(args.env_name)), "a")
+            else:
+                my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand.txt'.format(args.env_name)), "a")
         else:
             my_open = open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand.txt'.format(args.env_name)), "a")
         data = [str(i_iter), " ", str(log['avg_reward']), " ", str(log['num_episodes']),
@@ -168,9 +171,15 @@ def main_loop():
 
         if args.save_model_interval > 0 and (i_iter+1) % args.save_model_interval == 0:
             to_device(torch.device('cpu'), policy_net, value_net)
-            if args.randomization == True:
-                pickle.dump((policy_net, value_net, running_state),
-                        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand.p'.format(args.env_name)), 'wb'))
+            if args.randomization == 1:
+                if args.adaptation == 1:
+                    pickle.dump((policy_net, value_net, running_state),
+                                open(os.path.join(assets_dir(), 'learned_models/{}_ppo_adapt.p'.format(args.env_name)),
+                                     'wb'))
+                else:
+                    pickle.dump((policy_net, value_net, running_state),
+                                open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand.p'.format(args.env_name)),
+                                     'wb'))
             else:
                 pickle.dump((policy_net, value_net, running_state),
                         open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand.p'.format(args.env_name)), 'wb'))

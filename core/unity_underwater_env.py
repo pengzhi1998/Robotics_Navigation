@@ -6,6 +6,7 @@ import time
 import uuid
 import random
 import os
+from utils import *
 
 from typing import List
 from gym import spaces
@@ -215,7 +216,7 @@ class Underwater_navigation():
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
         unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
-                                     side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5000+rank)
+                                     side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5005)
 
         if self.randomization == True:
             if self.training == False:
@@ -270,6 +271,13 @@ class Underwater_navigation():
 
         # waiting for the initialization
         self.env.reset()
+        obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
+        if self.training == False:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+            data = [str(obs_goal_depthfromwater[2]), " ", str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+            for element in data:
+                my_open.write(element)
+            my_open.close()
         obs_img_ray, _, done, _ = self.env.step([0, 0])
 
         # observations per frame
@@ -277,6 +285,13 @@ class Underwater_navigation():
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                                     obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
+
+        if self.training == False:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+            for element in data:
+                my_open.write(element)
+            my_open.close()
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         # print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
@@ -310,7 +325,8 @@ class Underwater_navigation():
             obs_goal_depthfromwater[1]: vertical distance
             obs_goal_depthfromwater[2]: angle from robot's orientation to the goal (degree)
             obs_goal_depthfromwater[3]: robot's current y position
-            obs_goal_depthfromwater[4]: robot's current z position            
+            obs_goal_depthfromwater[4]: robot's current x position            
+            obs_goal_depthfromwater[5]: robot's current z position            
         """
         # 1. give a negative reward when robot is too close to nearby obstacles, seafloor or the water surface
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
@@ -408,12 +424,19 @@ class Underwater_navigation():
         # cv2.imwrite("img_rgb_step.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_step.png", 256 * self.obs_preddepths[0])
 
+        if self.training == False:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+            for element in data:
+                my_open.write(element)
+            my_open.close()
+
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, \
                self.visibility_para_Gaussian, reward, done, 0
 
 # env = []
 # for i in range(1):
-#     env.append(Underwater_navigation(True, True, i, 4))
+#     env.append(Underwater_navigation('midas', True, True, i, 4))
 #
 # while True:
 #     a = 0
@@ -425,8 +448,8 @@ class Underwater_navigation():
 #     # cam, goal, ray = env2.reset()
 #     print(a, ray)
 #     while not done:
-#         cam, goal, ray, action, visibility, reward, done, _ = env[0].step([0, 0.0])
-#         print(action, ray)
+#         cam, goal, ray, action, visibility, reward, done, _ = env[0].step([0, 1.0])
+#         print(goal, ray, action)
 #         # cam, goal, ray, reward, done, _ = env[1].step([0.0, 0.0])
 #         # cam, goal, ray, reward, done, _ = env[2].step([0.0, 0.0])
 #         # cam, goal, ray, reward, done, _ = env[3].step([0.0, 0.0])

@@ -99,7 +99,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
                 env.render()
             if done:
                 reward_done += reward
-                if reward > 0:
+                if reward > 0 and t < 499:
                     num_episodes_success += 1
                     num_steps_episodes += t
                 break
