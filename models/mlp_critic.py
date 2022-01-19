@@ -15,18 +15,17 @@ class Value(nn.Module):
         self.fc_goal = nn.Linear(HIST * 3, 96)
         self.fc_ray = nn.Linear(HIST * 1, 32)
         self.fc_action = nn.Linear(HIST * 2, 64)
-        self.fc_visibility = nn.Linear(1 * 1, 16)
 
         """ layers for inputs concatenated information """
-        self.img_goal_ray1 = nn.Linear(720, 512)
-        self.img_goal_ray2 = nn.Linear(528, 1)  # two dimensions of actions: upward and downward; turning
+        self.img_goal_ray1 = nn.Linear(704, 512)
+        self.img_goal_ray2 = nn.Linear(512, 1)  # two dimensions of actions: upward and downward; turning
 
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
         self.img_goal_ray2.weight.data.mul_(1)
         self.img_goal_ray2.bias.data.mul_(0.0)
 
-    def forward(self, depth_img, goal, ray, hist_action, visibility):
+    def forward(self, depth_img, goal, ray, hist_action):
         depth_img = self.relu(self.conv1(depth_img))
         depth_img = self.relu(self.conv2(depth_img))
         depth_img = self.relu(self.conv3(depth_img))
@@ -42,12 +41,8 @@ class Value(nn.Module):
         hist_action = hist_action.view(hist_action.size(0), -1)
         hist_action = self.relu(self.fc_action(hist_action))
 
-        visibility = visibility.view(visibility.size(0), -1)
-        visibility = self.relu(self.fc_visibility(visibility))
-
-        img_goal_ray_aciton = torch.cat((depth_img, goal, ray, hist_action, visibility), 1)
+        img_goal_ray_aciton = torch.cat((depth_img, goal, ray, hist_action), 1)
         img_goal_ray_aciton = self.relu(self.img_goal_ray1(img_goal_ray_aciton))
-        img_goal_ray_aciton = torch.cat((img_goal_ray_aciton, visibility), 1)
         value = self.tanh(self.img_goal_ray2(img_goal_ray_aciton))
 
         return value

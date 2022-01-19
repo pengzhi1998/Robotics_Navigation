@@ -4,8 +4,8 @@ import random
 # Taken from
 # https://github.com/pytorch/tutorials/blob/master/Reinforcement%20(Q-)Learning%20with%20PyTorch.ipynb
 
-Transition = namedtuple('Transition', ('img_depth', 'goal', 'ray', 'hist_action', 'visibility', 'action', 'mask',
-                                       'next_img_depth', 'next_goal', 'next_hist_action', 'next_visibility', 'reward'))
+Transition = namedtuple('Transition', ('img_depth', 'goal', 'ray', 'hist_action', 'action', 'mask',
+                                       'next_img_depth', 'next_goal', 'next_hist_action', 'reward'))
 
 
 class Memory(object):

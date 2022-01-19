@@ -36,7 +36,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     print(time.time())
 
     while num_steps < min_batch_size:
-        img_depth, goal, ray, hist_action, visibility = env.reset()
+        img_depth, goal, ray, hist_action = env.reset()
         if running_state is not None:
             # print "before", img_depth.shape, goal.shape, img_depth.dtype
             # print "first_depth_before:", np.max(img_depth), "first_goal_before:", np.max(goal)
@@ -44,13 +44,12 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             _, goal, ray = running_state(img_depth, goal, ray)
             img_depth = np.float64((img_depth - 0.5) / 0.5) # the predicted depth ranges from 0 - 1
             hist_action = np.float64(hist_action)
-            visibility = np.float64(visibility)
             # print "first_depth_after:", np.max(img_depth), "first_goal_after:", np.max(goal)
             # print "after", img_depth.shape, goal.shape, img_depth.dtype
         else:
-            img_depth, goal, ray, hist_action, visibility = \
+            img_depth, goal, ray, hist_action = \
                 img_depth.astype(np.float64), goal.astype(np.float64), ray.astype(np.float64), \
-                hist_action.astype(np.float64), visibility.astype(np.float64)
+                hist_action.astype(np.float64)
         reward_episode = 0
 
         for t in range(10000):
@@ -60,14 +59,13 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             goal_var = tensor(goal).unsqueeze(0)
             ray_var = tensor(ray).unsqueeze(0)
             hist_action_var = tensor(hist_action).unsqueeze(0)
-            visibility_var = tensor(visibility).unsqueeze(0)
             with torch.no_grad():
                 if mean_action:
-                    action = policy(img_depth_var, goal_var, ray_var, hist_action_var, visibility_var)[0][0].numpy()
+                    action = policy(img_depth_var, goal_var, ray_var, hist_action_var)[0][0].numpy()
                 else:
-                    action = policy.select_action(img_depth_var, goal_var, ray_var, hist_action_var, visibility_var)[0].numpy()
+                    action = policy.select_action(img_depth_var, goal_var, ray_var, hist_action_var)[0].numpy()
             action = int(action) if policy.is_disc_action else action.astype(np.float64)
-            next_img_depth, next_goal, next_ray, next_hist_action, next_visibility, reward, done, _ = env.step(action)
+            next_img_depth, next_goal, next_ray, next_hist_action, reward, done, _ = env.step(action)
             reward_episode += reward
             if running_state is not None:
                 # print "before", next_img_depth.shape, next_goal.shape
@@ -75,14 +73,13 @@ def collect_samples(pid, queue, env, policy, custom_reward,
                 _, next_goal, next_ray = running_state(next_img_depth, next_goal, next_ray)
                 next_img_depth = np.float64((next_img_depth - 0.5) / 0.5)
                 next_hist_action = np.float64(next_hist_action)
-                next_visibility = np.float64(next_visibility)
                 # print next_img_depth
                 # print "depth_after:", np.max(next_img_depth), np.min(next_img_depth), "goal_after:", np.max(next_goal), np.min(goal), "\n\n\n"
                 # print "after", next_img_depth.shape, next_goal.shape
             else:
-                next_img_depth, next_goal, next_ray, next_hist_action, next_visibility = \
+                next_img_depth, next_goal, next_ray, next_hist_action = \
                     next_img_depth.astype(np.float64), next_goal.astype(np.float64),\
-                    next_ray.astype(np.float64), next_hist_action.astype(np.float64), next_visibility.astype(np.float64)
+                    next_ray.astype(np.float64), next_hist_action.astype(np.float64)
 
             if custom_reward is not None:
                 reward = custom_reward(img_depth, goal, ray, action)
@@ -92,8 +89,8 @@ def collect_samples(pid, queue, env, policy, custom_reward,
 
             mask = 0 if done else 1
 
-            memory.push(img_depth, goal, ray, hist_action, visibility, action, mask,
-                        next_img_depth, next_goal, next_hist_action, next_visibility, reward)
+            memory.push(img_depth, goal, ray, hist_action, action, mask,
+                        next_img_depth, next_goal, next_hist_action, reward)
 
             if render:
                 env.render()
@@ -108,7 +105,6 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             goal = next_goal
             ray = next_ray
             hist_action = next_hist_action
-            visibility = next_visibility # no need to do that because in one episode it remains the same
 
         # log stats
         num_steps += (t + 1)
