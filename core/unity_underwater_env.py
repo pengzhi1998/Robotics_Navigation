@@ -230,7 +230,8 @@ class Underwater_navigation():
                 if start_goal_pos == None:
                     raise AssertionError
                 self.start_goal_pos = start_goal_pos
-                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [20])
+                visibility = 3 * (13 ** 0.5)
+                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
 
         config_channel.set_configuration_parameters(time_scale=10, capture_frame_rate=100)
         self.env = UnityToGymWrapper(unity_env, allow_multiple_obs=True)
@@ -262,7 +263,7 @@ class Underwater_navigation():
                 else:
                     self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
-            visibility = 20
+            visibility = 3 * (13 ** 0.5)
             self.visibility_para_Gaussian = np.array([0])
             if self.training == False:
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
