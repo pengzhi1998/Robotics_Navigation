@@ -75,7 +75,8 @@ ray_dim = env[0].observation_space_ray
 """define actor and critic"""
 if args.randomization == True:
     policy_net, value_net, running_state = pickle.load(
-        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_best.p'.format(args.env_name,
+        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_best.p'.format(args.env_name,
+        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_adapt_250iters.p'.format(args.env_name,
                                                                       args.hist_length)), "rb"))
 else:
     policy_net, value_net, running_state = pickle.load(
@@ -85,7 +86,8 @@ else:
 policy_net.to(device)
 
 """create agent"""
-agent = Agent(env, policy_net, device, running_state=running_state, num_threads=args.num_threads)
+agent = Agent(env, policy_net, device, running_state=running_state, num_threads=args.num_threads,
+              training=False, adaptation=args.adaptation)
 
 while True:
     if args.eval_batch_size > 0:

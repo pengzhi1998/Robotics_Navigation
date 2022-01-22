@@ -1,6 +1,7 @@
 import multiprocessing
 from utils.replay_memory import Memory
 from utils.torchpy import *
+from utils.search import Gaussian
 import math
 import time
 import os
@@ -11,8 +12,28 @@ os.environ["OMP_NUM_THREADS"] = "1"
 def signal_handler(sig, frame):
     sys.exit(0)
 
+tem = 1
+learning_rate_search = 5e-2 # Adam
+
+Gaussian = Gaussian()
+optimizer = torch.optim.Adam(Gaussian.parameters(), lr=learning_rate_search)
+
+def Searching(data):
+    data_visibility = data[:, 0]
+    data_reward = data[:, 1]
+    value = torch.mean(data_reward)
+    for i in range(200):
+        loss = 0
+        for i in range(len(data_visibility)):
+            loss -= Gaussian(data_visibility[i]) * torch.exp((data_reward[i] - value)/tem)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+print(Gaussian.get_meanstd())
+
 def collect_samples(pid, queue, env, policy, custom_reward,
-                    mean_action, render, running_state, min_batch_size):
+                    mean_action, render, running_state, min_batch_size, training=True, adaptation=True):
     if pid > 0:
         torch.manual_seed(torch.randint(0, 5000, (1,)) * pid)
         if hasattr(env, 'np_random'):
@@ -21,6 +42,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             env.env.np_random.seed(env.env.np_random.randint(5000) * pid)
     log = dict()
     memory = Memory()
+    memory_search = []
     num_steps = 0
     num_episodes_success = 0
     num_steps_episodes = 0
@@ -119,6 +141,11 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         min_reward = min(min_reward, reward_episode)
         max_reward = max(max_reward, reward_episode)
 
+        # searching
+        if training == False and adaptation == True:
+            memory_search.append([visibility, reward_episode])
+            print(memory_search)
+
     print(time.time())
 
     log['num_steps'] = num_steps
@@ -166,13 +193,16 @@ def merge_log(log_list):
 
 class Agent:
 
-    def __init__(self, env, policy, device, custom_reward=None, running_state=None, num_threads=1):
+    def __init__(self, env, policy, device, custom_reward=None, running_state=None, num_threads=1, training=True,
+                 adaptation=True):
         self.env = env
         self.policy = policy
         self.device = device
         self.custom_reward = custom_reward
         self.running_state = running_state
         self.num_threads = num_threads
+        self.training = training
+        self.adaptation = adaptation
 
     def collect_samples(self, min_batch_size, mean_action=False, render=False):
         t_start = time.time()
@@ -184,13 +214,13 @@ class Agent:
         for i in range(self.num_threads-1):
             env = self.env[i+1]
             worker_args = (i+1, queue, env, self.policy, self.custom_reward, mean_action,
-                           False, self.running_state, thread_batch_size)
+                           False, self.running_state, thread_batch_size, self.training, self.adaptation)
             workers.append(multiprocessing.Process(target=collect_samples, args=worker_args))
         for worker in workers:
             worker.start()
 
         memory, log = collect_samples(0, None, self.env[0], self.policy, self.custom_reward, mean_action,
-                                      render, self.running_state, thread_batch_size)
+                                      render, self.running_state, thread_batch_size, self.training, self.adaptation)
                                       # render, None, thread_batch_size)
 
         worker_logs = [None] * len(workers)
