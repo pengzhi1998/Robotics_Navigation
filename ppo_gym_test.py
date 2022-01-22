@@ -82,8 +82,9 @@ else:
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_20iters.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_35iters.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_50iters.p'.format(args.env_name,
-        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_175iters.p'.format(args.env_name,
-        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_0120_205iters.p'.format(args.env_name,
+        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_175iters.p'.format(args.env_name,
+        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_250iters.p'.format(args.env_name,
+        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_205iters.p'.format(args.env_name,
                                                                               args.hist_length)), "rb"))
 
 policy_net.to(device)
