@@ -197,7 +197,8 @@ class PosChannel(SideChannel):
 class Underwater_navigation():
     def __init__(self, depth_prediction_model, adaptation, randomization, rank, HIST, start_goal_pos=None, training=True):
         if adaptation and not randomization:
-            raise Exception("Adaptation should be used with domain randomization during training")
+            print("adapting to a visibility_representation")
+
         self.adaptation = adaptation
         self.randomization = randomization
         self.HIST = HIST
@@ -215,7 +216,7 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test2",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5005)
 
         if self.randomization == True:

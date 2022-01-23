@@ -31,8 +31,6 @@ def Searching(data):
         loss.backward()
         optimizer.step()
 
-print(Gaussian.get_meanstd())
-
 def collect_samples(pid, queue, env, policy, custom_reward,
                     mean_action, render, running_state, min_batch_size, training=True, adaptation=True):
     if pid > 0:
@@ -59,10 +57,12 @@ def collect_samples(pid, queue, env, policy, custom_reward,
     print(time.time())
 
     while num_steps < min_batch_size:
-        visibility_mean, visibility_std = Gaussian.get_meanstd()
-        dis = torch.distributions.normal.Normal(visibility_mean, visibility_std)
-        visibility = torch.clip(dis.sample(), -1, 1)
-        img_depth, goal, ray, hist_action, visibility = env.reset()
+        if num_episodes < 2:
+            visibility_representation = torch.clip(Gaussian.sample_value(), -1, 1)
+        else:
+            visibility_representation = torch.clip(Gaussian.get_meanstd()[0], -1, 1)
+
+        img_depth, goal, ray, hist_action, _ = env.reset()
         if running_state is not None:
             # print "before", img_depth.shape, goal.shape, img_depth.dtype
             # print "first_depth_before:", np.max(img_depth), "first_goal_before:", np.max(goal)
@@ -70,13 +70,13 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             _, goal, ray = running_state(img_depth, goal, ray)
             img_depth = np.float64((img_depth - 0.5) / 0.5) # the predicted depth ranges from 0 - 1
             hist_action = np.float64(hist_action)
-            visibility = np.float64(visibility)
+            visibility = np.float64(visibility_representation)
             # print "first_depth_after:", np.max(img_depth), "first_goal_after:", np.max(goal)
             # print "after", img_depth.shape, goal.shape, img_depth.dtype
         else:
             img_depth, goal, ray, hist_action, visibility = \
                 img_depth.astype(np.float64), goal.astype(np.float64), ray.astype(np.float64), \
-                hist_action.astype(np.float64), visibility.astype(np.float64)
+                hist_action.astype(np.float64), visibility_representation.astype(np.float64)
         reward_episode = 0
 
         for t in range(10000):
@@ -93,7 +93,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
                 else:
                     action = policy.select_action(img_depth_var, goal_var, ray_var, hist_action_var, visibility_var)[0].numpy()
             action = int(action) if policy.is_disc_action else action.astype(np.float64)
-            next_img_depth, next_goal, next_ray, next_hist_action, next_visibility, reward, done, _ = env.step(action)
+            next_img_depth, next_goal, next_ray, next_hist_action, _, reward, done, _ = env.step(action)
             reward_episode += reward
             if running_state is not None:
                 # print "before", next_img_depth.shape, next_goal.shape
@@ -101,14 +101,14 @@ def collect_samples(pid, queue, env, policy, custom_reward,
                 _, next_goal, next_ray = running_state(next_img_depth, next_goal, next_ray)
                 next_img_depth = np.float64((next_img_depth - 0.5) / 0.5)
                 next_hist_action = np.float64(next_hist_action)
-                next_visibility = np.float64(next_visibility)
+                next_visibility = np.float64(visibility_representation)
                 # print next_img_depth
                 # print "depth_after:", np.max(next_img_depth), np.min(next_img_depth), "goal_after:", np.max(next_goal), np.min(goal), "\n\n\n"
                 # print "after", next_img_depth.shape, next_goal.shape
             else:
                 next_img_depth, next_goal, next_ray, next_hist_action, next_visibility = \
                     next_img_depth.astype(np.float64), next_goal.astype(np.float64),\
-                    next_ray.astype(np.float64), next_hist_action.astype(np.float64), next_visibility.astype(np.float64)
+                    next_ray.astype(np.float64), next_hist_action.astype(np.float64), visibility_representation.astype(np.float64)
 
             if custom_reward is not None:
                 reward = custom_reward(img_depth, goal, ray, action)
@@ -147,10 +147,10 @@ def collect_samples(pid, queue, env, policy, custom_reward,
 
         # searching
         if training == False and adaptation == True:
-            memory_search.append([visibility, reward_episode])
-            if num_episodes > 1:
+            memory_search.append([visibility_representation, reward_episode])
+            if 1 < num_episodes <= 20:
                 Searching(torch.tensor(memory_search))
-            visibility_mean, visibility_std = Gaussian.get_meanstd()
+                print(Gaussian.get_meanstd(), "\n", memory_search)
 
     print(time.time())
 

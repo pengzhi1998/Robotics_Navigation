@@ -12,11 +12,13 @@ class Gaussian(nn.Module):
         super().__init__()
         self.mean = nn.Parameter(torch.Tensor([0]), requires_grad=True)
         self.std = nn.Parameter(torch.Tensor([1]), requires_grad=True)
+        self.normal = norm.Normal(self.mean, self.std)
 
     def forward(self, x):
-        # normal = torch.distributions.Normal(self.mean, self.std)
-        normal = norm.Normal(self.mean, self.std)
-        return normal.log_prob(x)
+        return self.normal.log_prob(x)
 
     def get_meanstd(self):
         return self.mean, self.std
+
+    def sample_value(self):
+        return self.normal.sample()
