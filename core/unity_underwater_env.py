@@ -264,6 +264,7 @@ class Underwater_navigation():
                     self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
             visibility = 3 * (13 ** 0.5)
+            # visibility = 3 # testing
             self.visibility_para_Gaussian = np.array([0])
             if self.training == False:
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
@@ -285,6 +286,7 @@ class Underwater_navigation():
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                                     obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
+        # obs_ray = np.array([0])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
         if self.training == False:
@@ -311,6 +313,7 @@ class Underwater_navigation():
         self.time_before = time.time()
         # action[0] controls its vertical speed, action[1] controls its rotation speed
         action_ver = action[0]
+        # action_ver = 0
         action_rot = action[1] * self.twist_range
 
         # observations per frame
@@ -318,6 +321,7 @@ class Underwater_navigation():
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                                     obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
+        # obs_ray = np.array([0])
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
         """

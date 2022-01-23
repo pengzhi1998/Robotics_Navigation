@@ -63,6 +63,7 @@ if torch.cuda.is_available():
 """environment"""
 env = []
 # start_goal_pos = [15., -2.5, -15, 0., 270., 0., -20, -1.5, 20] # test0
+# start_goal_pos = [15., -2.5, -15, 0., 270., 0., 5, -1.5,-5] # test0
 start_goal_pos = [12.91, -3.42, 2.76, 0., 270., 0., -.67, -1.97, -1.45] # test1
 # start_goal_pos = [14, -3.42, 0., 0., 0., 0., -6.67, -1.97, -3.45] # test2
 for i in range(args.num_threads):
@@ -84,6 +85,8 @@ else:
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_50iters.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_175iters.p'.format(args.env_name,
         open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_250iters.p'.format(args.env_name,
+        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_2000_120iters.p'.format(args.env_name,
+        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_noechosounder_250iters.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_205iters.p'.format(args.env_name,
                                                                               args.hist_length)), "rb"))
 
