@@ -276,7 +276,7 @@ class Underwater_navigation():
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
         if self.training == False:
             my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[2]), " ", str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
             for element in data:
                 my_open.write(element)
             my_open.close()

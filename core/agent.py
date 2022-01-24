@@ -1,6 +1,7 @@
 import multiprocessing
 from utils.replay_memory import Memory
 from utils.torchpy import *
+from utils.tools import *
 import math
 import time
 import os
@@ -12,7 +13,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def collect_samples(pid, queue, env, policy, custom_reward,
-                    mean_action, render, running_state, min_batch_size):
+                    mean_action, render, running_state, min_batch_size, training=True):
     if pid > 0:
         torch.manual_seed(torch.randint(0, 5000, (1,)) * pid)
         if hasattr(env, 'np_random'):
@@ -115,6 +116,15 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         min_reward = min(min_reward, reward_episode)
         max_reward = max(max_reward, reward_episode)
 
+        if training == False:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+            data = [str(reward_episode), "\n\n"]
+            for element in data:
+                my_open.write(element)
+            my_open.close()
+            if num_episodes >= 5:
+                exit()
+
     print(time.time())
 
     log['num_steps'] = num_steps
@@ -162,13 +172,14 @@ def merge_log(log_list):
 
 class Agent:
 
-    def __init__(self, env, policy, device, custom_reward=None, running_state=None, num_threads=1):
+    def __init__(self, env, policy, device, custom_reward=None, running_state=None, num_threads=1, training=True):
         self.env = env
         self.policy = policy
         self.device = device
         self.custom_reward = custom_reward
         self.running_state = running_state
         self.num_threads = num_threads
+        self.training = training
 
     def collect_samples(self, min_batch_size, mean_action=False, render=False):
         t_start = time.time()
@@ -180,13 +191,13 @@ class Agent:
         for i in range(self.num_threads-1):
             env = self.env[i+1]
             worker_args = (i+1, queue, env, self.policy, self.custom_reward, mean_action,
-                           False, self.running_state, thread_batch_size)
+                           False, self.running_state, thread_batch_size, self.training)
             workers.append(multiprocessing.Process(target=collect_samples, args=worker_args))
         for worker in workers:
             worker.start()
 
         memory, log = collect_samples(0, None, self.env[0], self.policy, self.custom_reward, mean_action,
-                                      render, self.running_state, thread_batch_size)
+                                      render, self.running_state, thread_batch_size, training=self.training)
                                       # render, None, thread_batch_size)
 
         worker_logs = [None] * len(workers)

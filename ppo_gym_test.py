@@ -95,7 +95,7 @@ else:
 policy_net.to(device)
 
 """create agent"""
-agent = Agent(env, policy_net, device, running_state=running_state, num_threads=args.num_threads)
+agent = Agent(env, policy_net, device, running_state=running_state, num_threads=args.num_threads, training=False)
 
 while True:
     if args.eval_batch_size > 0:
