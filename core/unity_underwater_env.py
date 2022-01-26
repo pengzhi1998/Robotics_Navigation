@@ -215,7 +215,7 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test0",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5005)
 
         if self.randomization == True:
