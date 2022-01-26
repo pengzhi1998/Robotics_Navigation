@@ -244,32 +244,9 @@ class Underwater_navigation():
             os.path.abspath("./") + "/DPT/weights/midas_v21_small-70d6b9c8.pt")
 
     def reset(self):
+        self.waypoint = 0
         self.step_count = 0
-        if self.randomization == True:
-            if self.adaptation == True:
-                visibility_para = random.uniform(-1, 1)
-                visibility = 3 * (13 ** ((visibility_para + 1)/2))
-                self.visibility_para_Gaussian = np.clip(np.random.normal(visibility_para, 0.02, 1), -1, 1)
-                if self.training == False:
-                    self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
-                else:
-                    self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
-            else:
-                visibility_para = random.uniform(-1, 1)
-                visibility = 3 * (13 ** ((visibility_para + 1) / 2))
-                self.visibility_para_Gaussian = np.array([0])
-                if self.training == False:
-                    self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
-                else:
-                    self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
-        else:
-            # visibility = 3 * (13 ** 0.5)
-            visibility = 20 # testing in the new shader
-            self.visibility_para_Gaussian = np.array([0])
-            if self.training == False:
-                self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
-            else:
-                self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
+        self.pos_info.assign_testpos_visibility(self.start_goal_pos[0:9] + [20])
 
         # waiting for the initialization
         self.env.reset()
@@ -304,7 +281,6 @@ class Underwater_navigation():
         self.obs_goals = np.array([obs_goal_depthfromwater[:3].tolist()] * self.HIST)
         self.obs_rays = np.array([obs_ray.tolist()] * self.HIST)
         self.obs_actions = np.array([[0, 0]] * self.HIST)
-        self.obs_visibility = np.reshape(self.visibility_para_Gaussian, [1, 1, 1])
 
         # cv2.imwrite("img_rgb_reset.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_reset.png", 256 * self.obs_preddepths[0])
@@ -334,6 +310,7 @@ class Underwater_navigation():
             obs_goal_depthfromwater[3]: robot's current y position
             obs_goal_depthfromwater[4]: robot's current x position            
             obs_goal_depthfromwater[5]: robot's current z position            
+            obs_goal_depthfromwater[6]: robot's current orientation            
         """
         # 1. give a negative reward when robot is too close to nearby obstacles, seafloor or the water surface
         obstacle_distance = np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
@@ -361,12 +338,42 @@ class Underwater_navigation():
             else:
                 reward_goal_reached = 0
         else:
-            if obs_goal_depthfromwater[0] < 0.8:
-                reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
-                done = True
-                print("Reached the goal area!")
+            if self.waypoint != 4:
+                if obs_goal_depthfromwater[0] < 0.8:
+                    reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
+                    done = True
+                    self.waypoint += 1
+                    print("Reached the goal area!")
+                    if self.waypoint < 5:
+                        my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                        data = ["\n"]
+                        for element in data:
+                            my_open.write(element)
+                        my_open.close()
+                        done = False
+                        self.pos_info.assign_testpos_visibility([obs_goal_depthfromwater[4], obs_goal_depthfromwater[3], obs_goal_depthfromwater[5]
+                                                                 , 0, obs_goal_depthfromwater[6], 0] +
+                                                                self.start_goal_pos[9 + 3 * (self.waypoint -1) : 9 + 3 * self.waypoint] + [20])
+                else:
+                    reward_goal_reached = 0
             else:
-                reward_goal_reached = 0
+                if obs_goal_depthfromwater[0] < 10.:
+                    reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
+                    done = True
+                    self.waypoint += 1
+                    print("Reached the goal area!")
+                    if self.waypoint < 5:
+                        my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                        data = ["\n"]
+                        for element in data:
+                            my_open.write(element)
+                        my_open.close()
+                        done = False
+                        self.pos_info.assign_testpos_visibility([obs_goal_depthfromwater[4], obs_goal_depthfromwater[3], obs_goal_depthfromwater[5]
+                                                                 , 0, obs_goal_depthfromwater[6], 0] +
+                                                                self.start_goal_pos[9 + 3 * (self.waypoint -1) : 9 + 3 * self.waypoint] + [20])
+                else:
+                    reward_goal_reached = 0
 
         # 3. give a positive reward if the robot is reaching the goal
         reward_goal_reaching_horizontal = (-np.abs(np.deg2rad(obs_goal_depthfromwater[2])) + np.pi / 3) / 10
@@ -389,7 +396,7 @@ class Underwater_navigation():
         self.step_count += 1
         # print(self.step_count)
 
-        if self.step_count > 500:
+        if self.step_count > 3000:
             done = True
             print("Exceeds the max num_step...")
 

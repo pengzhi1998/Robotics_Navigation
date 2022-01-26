@@ -63,16 +63,12 @@ if torch.cuda.is_available():
 """environment"""
 env = []
 # start_goal_pos = [15., -2.5, -15, 0., 270., 0., -20, -1.5, 20] # test0
-start_goal_pos = [15., -2.5, -15, 0., 270., 0., 5, -2.5,-5] # test0
-# start_goal_pos = [14, -3.42, 0., 0., 0., 0., -6.67, -1.97, -3.45] # test3
-# start_goal_pos = [8, -3.42, 2.76, 0., 270., 0., -7.67, -1.97, 1.45] # test5
-# start_goal_pos = [10, -1.5, 0, 0., 270., 0., -10, -3.5, 0] # test6
-
-# for the paper's image
-# start_goal_pos = [9, -3.42, -1., 0., 270., 0., -6.67, -1.97, -3.45] # test3
-# start_goal_pos = [4.367, -1.81, -0.63, 0., 270., 0., -7.67, -1.97, 1.45] # test5
-# start_goal_pos = [5.2, -4.37, 4.77, 0., 250., 0., -10, -3.5, 0] # test6
-
+start_goal_pos_1 = [14., -2.5, -15, 0., 270., 0., 5, -2.5, -5] # test0
+start_goal_pos_2 = [-10, -2.5, 0] # test0
+start_goal_pos_3 = [-10, -2.5, 10] # test0
+start_goal_pos_4 = [-20, -2.5, 20] # test0
+start_goal_pos_5 = [-10, -2.5, 50] # test0
+start_goal_pos = start_goal_pos_1 + start_goal_pos_2 + start_goal_pos_3 + start_goal_pos_4 + start_goal_pos_5
 
 for i in range(args.num_threads):
     env.append(Underwater_navigation(args.depth_prediction_model, args.adaptation, args.randomization, i, args.hist_length,
