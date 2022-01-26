@@ -263,8 +263,8 @@ class Underwater_navigation():
                 else:
                     self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
-            visibility = 3 * (13 ** 0.5)
-            # visibility = 1000 # testing in the new shader
+            # visibility = 3 * (13 ** 0.5)
+            visibility = 20 # testing in the new shader
             self.visibility_para_Gaussian = np.array([0])
             if self.training == False:
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
@@ -314,8 +314,8 @@ class Underwater_navigation():
     def step(self, action):
         self.time_before = time.time()
         # action[0] controls its vertical speed, action[1] controls its rotation speed
-        action_ver = action[0]
-        # action_ver = 0
+        # action_ver = action[0]
+        action_ver = 0
         action_rot = action[1] * self.twist_range
 
         # observations per frame

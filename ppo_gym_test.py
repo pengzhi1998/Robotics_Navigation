@@ -63,7 +63,7 @@ if torch.cuda.is_available():
 """environment"""
 env = []
 # start_goal_pos = [15., -2.5, -15, 0., 270., 0., -20, -1.5, 20] # test0
-start_goal_pos = [15., -2.5, -15, 0., 270., 0., 5, -1.5,-5] # test0
+start_goal_pos = [15., -2.5, -15, 0., 270., 0., 5, -2.5,-5] # test0
 # start_goal_pos = [14, -3.42, 0., 0., 0., 0., -6.67, -1.97, -3.45] # test3
 # start_goal_pos = [8, -3.42, 2.76, 0., 270., 0., -7.67, -1.97, 1.45] # test5
 # start_goal_pos = [10, -1.5, 0, 0., 270., 0., -10, -3.5, 0] # test6
@@ -88,10 +88,10 @@ if args.randomization == True:
                                                                       args.hist_length)), "rb"))
 else:
     policy_net, value_net, running_state = pickle.load(
-        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_250iters.p'.format(args.env_name,
+        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_250iters.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_2000_250iters.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_noechosounder_250iters.p'.format(args.env_name,
-        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_250iters.p'.format(args.env_name,
+        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_250iters.p'.format(args.env_name,
                                                                               args.hist_length)), "rb"))
 
 policy_net.to(device)

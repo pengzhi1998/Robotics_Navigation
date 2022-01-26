@@ -215,7 +215,7 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/water",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test0",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5005)
 
         if self.randomization == True:
@@ -263,8 +263,8 @@ class Underwater_navigation():
                 else:
                     self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
-            visibility = 3 * (13 ** 0.5)
-            # visibility = 1000 # testing in the new shader
+            # visibility = 3 * (13 ** 0.5)
+            visibility = 20 # testing in the new shader
             self.visibility_para_Gaussian = np.array([0])
             if self.training == False:
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
@@ -285,9 +285,9 @@ class Underwater_navigation():
 
         # observations per frame
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
-        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
-                                    obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
-        # obs_ray = np.array([0])
+        # obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
+        #                             obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
+        obs_ray = np.array([0])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
         if self.training == False:
@@ -314,16 +314,16 @@ class Underwater_navigation():
     def step(self, action):
         self.time_before = time.time()
         # action[0] controls its vertical speed, action[1] controls its rotation speed
-        action_ver = action[0]
-        # action_ver = 0
+        # action_ver = action[0]
+        action_ver = 0
         action_rot = action[1] * self.twist_range
 
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
-        obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
-                                    obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
-        # obs_ray = np.array([0])
+        # obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
+        #                             obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
+        obs_ray = np.array([0])
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()
 
         """
