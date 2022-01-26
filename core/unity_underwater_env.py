@@ -264,7 +264,7 @@ class Underwater_navigation():
                     self.pos_info.assign_testpos_visibility([0] * 9 + [visibility])
         else:
             visibility = 3 * (13 ** 0.5)
-            # visibility = 3 # testing
+            # visibility = 1000 # testing in the new shader
             self.visibility_para_Gaussian = np.array([0])
             if self.training == False:
                 self.pos_info.assign_testpos_visibility(self.start_goal_pos + [visibility])
@@ -276,7 +276,8 @@ class Underwater_navigation():
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
         if self.training == False:
             my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                    str(obs_goal_depthfromwater[3]), "\n"]
             for element in data:
                 my_open.write(element)
             my_open.close()
@@ -291,7 +292,8 @@ class Underwater_navigation():
 
         if self.training == False:
             my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                    str(obs_goal_depthfromwater[3]), "\n"]
             for element in data:
                 my_open.write(element)
             my_open.close()
@@ -431,7 +433,8 @@ class Underwater_navigation():
 
         if self.training == False:
             my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                    str(obs_goal_depthfromwater[3]), "\n"]
             for element in data:
                 my_open.write(element)
             my_open.close()
