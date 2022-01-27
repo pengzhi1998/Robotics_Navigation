@@ -349,7 +349,6 @@ class Underwater_navigation_Bug2():
             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
             goal_pos = np.array([self.start_goal_pos[6], self.start_goal_pos[8]])
 
-            print("0\n\n\n")
             if index_init < 7:
                 # follow the wall by turning left
                 if (goal_pos - cur_pos)[0] > 0:
@@ -424,7 +423,6 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
 
             else:
-                print("1\n\n\n")
                 # follow the wall by turning right
                 if (goal_pos - cur_pos)[0] > 0:
                     slope = (goal_pos - cur_pos)[1] / (goal_pos - cur_pos)[0]
@@ -465,9 +463,7 @@ class Underwater_navigation_Bug2():
                     slope = (goal_pos[1] - cur_pos[1]) / (goal_pos[0] - cur_pos[0])
                     intercept = goal_pos[1] - slope * goal_pos[0]
                     y_comp = slope * cur_pos[0] + intercept
-                    print(slope, "\n\n\n")
                     while y_comp > cur_pos[1] - 0.05:
-                        print(goal_pos, cur_pos, slope, intercept, y_comp, slope * cur_pos[0] + intercept, obs_goal_depthfromwater[6])
                         if np.min(self.multibeam) == 4:
                             self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -498,8 +494,7 @@ class Underwater_navigation_Bug2():
                                  sounder[1], sounder[3], sounder[7], sounder[11], sounder[15], sounder[19],
                                  sounder[23]]) * 4
                             y_comp = slope * cur_pos[0] + intercept
-            print("how???\n\n\n")
-        print("how???\n\n\n")
+
         obs_preddepth = self.dpt.run(self.obs_img_ray[0] ** 0.45)
         # obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
         #                             obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
