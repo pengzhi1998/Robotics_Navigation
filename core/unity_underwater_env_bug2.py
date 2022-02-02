@@ -251,13 +251,13 @@ class Underwater_navigation_Bug2():
         # waiting for the initialization
         self.env.reset()
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
-        if self.training == False:
-            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                    str(obs_goal_depthfromwater[3]), "\n"]
-            for element in data:
-                my_open.write(element)
-            my_open.close()
+        # if self.training == False:
+        #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+        #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+        #             str(obs_goal_depthfromwater[3]), "\n"]
+        #     for element in data:
+        #         my_open.write(element)
+        #     my_open.close()
         obs_img_ray, _, done, _ = self.env.step([0, 0, 0])
         self.obs_img_ray = obs_img_ray
 
@@ -268,13 +268,13 @@ class Underwater_navigation_Bug2():
         obs_ray = np.array([0])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-        if self.training == False:
-            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                    str(obs_goal_depthfromwater[3]), "\n"]
-            for element in data:
-                my_open.write(element)
-            my_open.close()
+        # if self.training == False:
+        #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+        #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+        #             str(obs_goal_depthfromwater[3]), "\n"]
+        #     for element in data:
+        #         my_open.write(element)
+        #     my_open.close()
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         # print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
@@ -306,13 +306,14 @@ class Underwater_navigation_Bug2():
                 self.obs_img_ray, _, done, _ = self.env.step([0, 0.2 * self.twist_range, 0])
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                if self.training == False:
-                    my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                    data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            str(obs_goal_depthfromwater[3]), "\n"]
-                    for element in data:
-                        my_open.write(element)
-                    my_open.close()
+                self.step_count += 1
+                # if self.training == False:
+                #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                #             str(obs_goal_depthfromwater[3]), "\n"]
+                #     for element in data:
+                #         my_open.write(element)
+                #     my_open.close()
             while angle < -3:
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                 distance = obs_goal_depthfromwater[0]
@@ -320,13 +321,15 @@ class Underwater_navigation_Bug2():
                 self.obs_img_ray, _, done, _ = self.env.step([0, -0.2 * self.twist_range, 0])
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                if self.training == False:
-                    my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                    data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            str(obs_goal_depthfromwater[3]), "\n"]
-                    for element in data:
-                        my_open.write(element)
-                    my_open.close()
+                self.step_count += 1
+                # if self.training == False:
+                #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                #             str(obs_goal_depthfromwater[3]), "\n"]
+                #     for element in data:
+                #         my_open.write(element)
+                #     my_open.close()
+
             # secondly move forward until there is an obstacle or reach the goal
             sounder = self.obs_img_ray[1]
             # echo sounder readings: 1. middle 2. first right 3. first left 4. second right ......
@@ -345,13 +348,14 @@ class Underwater_navigation_Bug2():
                 sounder[1], sounder[3], sounder[7], sounder[11], sounder[15], sounder[19], sounder[23]]) * 4
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                if self.training == False:
-                    my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                    data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            str(obs_goal_depthfromwater[3]), "\n"]
-                    for element in data:
-                        my_open.write(element)
-                    my_open.close()
+                self.step_count += 1
+                # if self.training == False:
+                #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                #             str(obs_goal_depthfromwater[3]), "\n"]
+                #     for element in data:
+                #         my_open.write(element)
+                #     my_open.close()
             if distance < 0.8:
                 break
             if self.waypoint == 4:
@@ -373,12 +377,13 @@ class Underwater_navigation_Bug2():
                     obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                     if self.training == False:
-                        my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                        data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                str(obs_goal_depthfromwater[3]), "\n"]
-                        for element in data:
-                            my_open.write(element)
-                        my_open.close()
+                        self.step_count += 1
+                        # my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                        # data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                        #         str(obs_goal_depthfromwater[3]), "\n"]
+                        # for element in data:
+                        #     my_open.write(element)
+                        # my_open.close()
             else:
                 while index != len(self.multibeam) - 1: # turn left
                     self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0])
@@ -388,13 +393,14 @@ class Underwater_navigation_Bug2():
                     index = np.argmin(self.multibeam)
                     obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                    if self.training == False:
-                        my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                        data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                str(obs_goal_depthfromwater[3]), "\n"]
-                        for element in data:
-                            my_open.write(element)
-                        my_open.close()
+                    self.step_count += 1
+                    # if self.training == False:
+                    #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                    #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                    #             str(obs_goal_depthfromwater[3]), "\n"]
+                    #     for element in data:
+                    #         my_open.write(element)
+                    #     my_open.close()
 
             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
@@ -420,13 +426,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         elif np.argmin(self.multibeam) != 0:
                             self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -439,13 +446,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         else:
                             self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -458,13 +466,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                 elif (goal_pos - cur_pos)[0] < 0:
                     slope = (goal_pos - cur_pos)[1] / (goal_pos - cur_pos)[0]
                     intercept = goal_pos[1] - slope * goal_pos[0]
@@ -482,13 +491,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         elif np.argmin(self.multibeam) != 0:
                             self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -501,13 +511,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         else:
                             self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -520,13 +531,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
 
             else:
                 # follow the wall by turning right
@@ -547,13 +559,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         elif np.argmin(self.multibeam) != 12:
                             self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -566,13 +579,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         else:
                             self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -585,13 +599,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                 elif (goal_pos - cur_pos)[0] < 0:
                     slope = (goal_pos[1] - cur_pos[1]) / (goal_pos[0] - cur_pos[0])
                     intercept = goal_pos[1] - slope * goal_pos[0]
@@ -609,13 +624,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         elif np.argmin(self.multibeam) != 12:
                             self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -628,13 +644,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
                         else:
                             self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
@@ -647,13 +664,14 @@ class Underwater_navigation_Bug2():
                             y_comp = slope * cur_pos[0] + intercept
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-                            if self.training == False:
-                                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                                data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                                        str(obs_goal_depthfromwater[3]), "\n"]
-                                for element in data:
-                                    my_open.write(element)
-                                my_open.close()
+                            self.step_count += 1
+                            # if self.training == False:
+                            #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            #     for element in data:
+                            #         my_open.write(element)
+                            #     my_open.close()
 
         obs_preddepth = self.dpt.run(self.obs_img_ray[0] ** 0.45)
         # obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
@@ -678,6 +696,12 @@ class Underwater_navigation_Bug2():
         if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.24 or obstacle_distance_vertical < 0.12:
             reward_obstacle = -10
             done = True
+            if self.training == False:
+                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                data = [str(self.step_count), " failed", "\n"]
+                for element in data:
+                    my_open.write(element)
+                my_open.close()
             print("Too close to the obstacle, seafloor or water surface!",
                   "\nhorizontal distance to nearest obstacle:", obstacle_distance,
                   "\ndistance to water surface", np.abs(obs_goal_depthfromwater[3]),
@@ -702,7 +726,7 @@ class Underwater_navigation_Bug2():
                     print("Reached the goal area!")
                     if self.waypoint < 5:
                         my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                        data = ["\n"]
+                        data = [str(self.step_count), " Success", "\n"]
                         for element in data:
                             my_open.write(element)
                         my_open.close()
@@ -721,13 +745,12 @@ class Underwater_navigation_Bug2():
                     done = True
                     self.waypoint += 1
                     print("Reached the goal area!")
-                    if self.waypoint < 5:
+                    if self.waypoint == 5:
                         my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                        data = ["\n"]
+                        data = [str(self.step_count), " Success", "\n"]
                         for element in data:
                             my_open.write(element)
                         my_open.close()
-                        done = False
                         self.pos_info.assign_testpos_visibility([obs_goal_depthfromwater[4], obs_goal_depthfromwater[3], obs_goal_depthfromwater[5]
                                                                  , 0, obs_goal_depthfromwater[6], 0] +
                                                                 self.start_goal_pos[9 + 3 * (self.waypoint -1) : 9 + 3 * self.waypoint] + [20])

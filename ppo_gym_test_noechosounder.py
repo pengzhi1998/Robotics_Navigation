@@ -87,7 +87,8 @@ else:
     policy_net, value_net, running_state = pickle.load(
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_10_250iters.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_norand_2000_250iters.p'.format(args.env_name,
-        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_noechosounder_250iters.p'.format(args.env_name,
+        # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_noechosounder_250iters.p'.format(args.env_name,
+        open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_noechosounder_250iters_trainedsolely.p'.format(args.env_name,
         # open(os.path.join(assets_dir(), 'learned_models/{}_ppo_rand_250iters.p'.format(args.env_name,
                                                                               args.hist_length)), "rb"))
 
