@@ -216,7 +216,7 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test2",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test6_3000",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5005)
 
         if self.randomization == True:
@@ -273,12 +273,12 @@ class Underwater_navigation():
         # waiting for the initialization
         self.env.reset()
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
-        if self.training == False:
-            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[2]), " ", str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
-            for element in data:
-                my_open.write(element)
-            my_open.close()
+        # if self.training == False:
+        #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+        #     data = [str(obs_goal_depthfromwater[2]), " ", str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+        #     for element in data:
+        #         my_open.write(element)
+        #     my_open.close()
         obs_img_ray, _, done, _ = self.env.step([0, 0])
 
         # observations per frame
@@ -287,12 +287,12 @@ class Underwater_navigation():
                                     obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
         obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
-        if self.training == False:
-            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
-            for element in data:
-                my_open.write(element)
-            my_open.close()
+        # if self.training == False:
+        #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+        #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+        #     for element in data:
+        #         my_open.write(element)
+        #     my_open.close()
 
         # construct the observations of depth images, goal infos, and rays for consecutive 4 frames
         # print(np.shape(obs_preddepth), np.shape(obs_goal_depthfromwater[:3]), np.shape(obs_ray), "\n\n\n")
@@ -339,6 +339,12 @@ class Underwater_navigation():
         if obstacle_distance < 0.5 or np.abs(obs_goal_depthfromwater[3]) < 0.24 or obstacle_distance_vertical < 0.12:
             reward_obstacle = -10
             done = True
+            if self.training == False:
+                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                data = [str(self.step_count), "failed", "\n"]
+                for element in data:
+                    my_open.write(element)
+                my_open.close()
             print("Too close to the obstacle, seafloor or water surface!",
                   "\nhorizontal distance to nearest obstacle:", obstacle_distance,
                   "\ndistance to water surface", np.abs(obs_goal_depthfromwater[3]),
@@ -358,6 +364,12 @@ class Underwater_navigation():
             if obs_goal_depthfromwater[0] < 0.8:
                 reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
                 done = True
+                if self.training == False:
+                    my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                    data = [str(self.step_count), " success", "\n"]
+                    for element in data:
+                        my_open.write(element)
+                    my_open.close()
                 print("Reached the goal area!")
             else:
                 reward_goal_reached = 0
@@ -425,12 +437,12 @@ class Underwater_navigation():
         # cv2.imwrite("img_rgb_step.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_step.png", 256 * self.obs_preddepths[0])
 
-        if self.training == False:
-            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
-            for element in data:
-                my_open.write(element)
-            my_open.close()
+        # if self.training == False:
+        #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+        #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), "\n"]
+        #     for element in data:
+        #         my_open.write(element)
+        #     my_open.close()
 
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, \
                self.visibility_para_Gaussian, reward, done, 0
