@@ -336,7 +336,7 @@ class Underwater_navigation_Bug2():
             self.multibeam = np.array([sounder[25], sounder[21], sounder[17], sounder[13], sounder[9], sounder[5], \
                         sounder[1], sounder[3], sounder[7], sounder[11], sounder[15], sounder[19], sounder[23]]) * 4 # from left to right
 
-            while distance > 0.8 and np.min(self.multibeam) > 1.5:
+            while distance > 0.8 and np.min(self.multibeam) > 1.:
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                 distance = obs_goal_depthfromwater[0]
                 if self.waypoint == 4:
@@ -369,7 +369,7 @@ class Underwater_navigation_Bug2():
             if index_init < 7:
                 while index != 0:
                     # obstacle is on robot's left, turn right
-                    self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0])
+                    self.obs_img_ray, _, done, _ = self.env.step([0, -0.8 * self.twist_range, 0])
                     sounder = self.obs_img_ray[1]
                     self.multibeam = np.array([sounder[25], sounder[21], sounder[17], sounder[13], sounder[9], sounder[5], \
                                  sounder[1], sounder[3], sounder[7], sounder[11], sounder[15], sounder[19], sounder[23]])*4
@@ -386,7 +386,7 @@ class Underwater_navigation_Bug2():
                         # my_open.close()
             else:
                 while index != len(self.multibeam) - 1: # turn left
-                    self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0])
+                    self.obs_img_ray, _, done, _ = self.env.step([0, 0.8 * self.twist_range, 0])
                     sounder = self.obs_img_ray[1]
                     self.multibeam = np.array([sounder[25], sounder[21], sounder[17], sounder[13], sounder[9], sounder[5], \
                                  sounder[1], sounder[3], sounder[7], sounder[11], sounder[15], sounder[19], sounder[23]])*4
@@ -415,7 +415,7 @@ class Underwater_navigation_Bug2():
                     y_comp = slope * cur_pos[0] + intercept
                     while y_comp + 0.2 > cur_pos[1]:
                         if np.min(self.multibeam) == 4:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -435,7 +435,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         elif np.argmin(self.multibeam) != 0:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -455,7 +455,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         else:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -480,7 +480,7 @@ class Underwater_navigation_Bug2():
                     y_comp = slope * cur_pos[0] + intercept
                     while y_comp < cur_pos[1] + 0.2:
                         if np.min(self.multibeam) == 4:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -500,7 +500,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         elif np.argmin(self.multibeam) != 0:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -520,7 +520,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         else:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -548,7 +548,7 @@ class Underwater_navigation_Bug2():
                     y_comp = slope * cur_pos[0] + intercept
                     while  y_comp < 0.2 + cur_pos[1]:
                         if np.min(self.multibeam) == 4:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -568,7 +568,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         elif np.argmin(self.multibeam) != 12:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -588,7 +588,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         else:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -613,7 +613,7 @@ class Underwater_navigation_Bug2():
                     y_comp = slope * cur_pos[0] + intercept
                     while y_comp > cur_pos[1] - 0.2:
                         if np.min(self.multibeam) == 4:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -633,7 +633,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         elif np.argmin(self.multibeam) != 12:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, 0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
@@ -653,7 +653,7 @@ class Underwater_navigation_Bug2():
                             #         my_open.write(element)
                             #     my_open.close()
                         else:
-                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 0.5])
+                            self.obs_img_ray, _, done, _ = self.env.step([0, -0.5 * self.twist_range, 1])
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                             cur_pos = np.array([obs_goal_depthfromwater[4], obs_goal_depthfromwater[5]])
                             sounder = self.obs_img_ray[1]
