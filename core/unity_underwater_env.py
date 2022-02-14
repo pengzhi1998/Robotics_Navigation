@@ -216,7 +216,7 @@ class Underwater_navigation():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pos_info = PosChannel()
         config_channel = EngineConfigurationChannel()
-        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test6_3000",
+        unity_env = UnityEnvironment(os.path.abspath("./") + "/underwater_env/test5_1000",
                                      side_channels=[config_channel, self.pos_info], worker_id=rank, base_port=5005)
 
         if self.randomization == True:
@@ -316,6 +316,7 @@ class Underwater_navigation():
         # observations per frame
         obs_img_ray, _, done, _ = self.env.step([action_ver, action_rot])
         obs_preddepth = self.dpt.run(obs_img_ray[0] ** 0.45)
+        print(np.min(obs_preddepth), np.max(obs_preddepth))
         obs_ray = np.array([np.min([obs_img_ray[1][1], obs_img_ray[1][3], obs_img_ray[1][5],
                                     obs_img_ray[1][33], obs_img_ray[1][35]]) * 8 * 0.5])
         obs_goal_depthfromwater = self.pos_info.goal_depthfromwater_info()

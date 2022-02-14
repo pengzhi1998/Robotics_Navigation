@@ -150,25 +150,25 @@ def collect_samples(pid, queue, env, policy, custom_reward,
         # searching
         if training == False and adaptation == True:
             memory_search.append([visibility_representation, reward_episode])
-            if num_episodes < 10:
+            if num_episodes <= 10:
                 my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
                 data = [str(reward_episode), "\n\n"]
                 for element in data:
                     my_open.write(element)
                 my_open.close()
 
-            elif 10 <= num_episodes < 20:
+            elif 10 < num_episodes <= 20:
                 Searching(torch.tensor(memory_search))
                 print(Gaussian.get_meanstd(), "\n", memory_search)
 
-            elif 20 <= num_episodes < 30:
+            elif 20 < num_episodes <= 30:
                 my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
                 data = [str(reward_episode), "\n\n"]
                 for element in data:
                     my_open.write(element)
                 my_open.close()
 
-            elif num_episodes >= 30:
+            if num_episodes == 30:
                 exit()
 
     print(time.time())
