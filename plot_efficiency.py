@@ -53,7 +53,9 @@ plt.plot(-10, 50, color='k', marker='o', markerfacecolor='yellow', markersize=80
 plt.text(-11, 49, 5, color='k', fontsize=20)
 
 ''' initial position '''
-plt.plot(14, -15, color='red', marker='<', markersize=8)
+circle1 = plt.Circle((14, -15), 1, color='g')
+circle1.set_zorder(1000)
+plt.gca().add_patch(circle1)
 
 ''' obstacles '''
 plt.plot(11.2, -10.3, color='k', marker='o', markersize=8)
@@ -107,7 +109,9 @@ plt.plot(-20, 20, color='k', marker='o', markerfacecolor='yellow', markersize=15
 plt.text(-21, 19, 4, color='k', fontsize=12)
 plt.plot(-10, 50, color='k', marker='o', markerfacecolor='yellow', markersize=80)
 plt.text(-11, 49, 5, color='k', fontsize=20)
-plt.plot(14, -15, color='red', marker='<', markersize=8)
+circle1 = plt.Circle((14, -15), 1, color='g')
+circle1.set_zorder(1000)
+plt.gca().add_patch(circle1)
 plt.plot(11.2, -10.3, color='k', marker='o', markersize=8)
 plt.plot(-3.01, -12.88, color='k', marker='o', markersize=8)
 plt.plot(-12.96, -9.97, color='k', marker='o', markersize=8)
@@ -147,7 +151,9 @@ plt.plot(-20, 20, color='k', marker='o', markerfacecolor='yellow', markersize=15
 plt.text(-21, 19, 4, color='k', fontsize=12)
 plt.plot(-10, 50, color='k', marker='o', markerfacecolor='yellow', markersize=80)
 plt.text(-11, 49, 5, color='k', fontsize=20)
-plt.plot(14, -15, color='red', marker='<', markersize=8)
+circle1 = plt.Circle((14, -15), 1, color='g')
+circle1.set_zorder(1000)
+plt.gca().add_patch(circle1)
 plt.plot(11.2, -10.3, color='k', marker='o', markersize=8)
 plt.plot(-3.01, -12.88, color='k', marker='o', markersize=8)
 plt.plot(-12.96, -9.97, color='k', marker='o', markersize=8)

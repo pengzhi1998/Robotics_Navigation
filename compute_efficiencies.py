@@ -34,9 +34,9 @@ for data_onemodel in whole_data:
         data_model_wp = []
         for data_onetrajectory in data_onemodel:
             if wp == 0:
-                data_piece = float(data_onetrajectory[wp][0])
+                data_piece = float(data_onetrajectory[wp][0])/2.
             else:
-                data_piece = float(data_onetrajectory[wp][0]) - float(data_onetrajectory[wp-1][0])
+                data_piece = (float(data_onetrajectory[wp][0]) - float(data_onetrajectory[wp-1][0]))/2.
             data_model_wp.append(data_piece)
         print(np.round(np.mean(data_model_wp), 2), np.round(np.std(data_model_wp), 2))
         data.append(data_model_wp)
