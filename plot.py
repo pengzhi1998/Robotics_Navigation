@@ -30,7 +30,7 @@ for data in whole_data:
     for i in range(len(data)):
         if data[i][0] == 'success':
             succ_num += 1.
-            steps.append(float(data[i][1]))
+            steps.append(float(data[i][1])/2)
     if len(steps) == 0:
         steps.append(0)
     successful_ratio = succ_num/10.0
