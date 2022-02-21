@@ -90,8 +90,8 @@ def collect_samples(pid, queue, env, policy, custom_reward,
 
             mask = 0 if done else 1
 
-            memory.push(img_depth, goal, ray, hist_action, action, mask,
-                        next_img_depth, next_goal, next_hist_action, reward)
+            # memory.push(img_depth, goal, ray, hist_action, action, mask,
+            #             next_img_depth, next_goal, next_hist_action, reward)
 
             if render:
                 env.render()
@@ -118,11 +118,12 @@ def collect_samples(pid, queue, env, policy, custom_reward,
 
         if training == False:
             my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(reward_episode), "\n\n"]
+            # data = [str(reward_episode), "\n\n"]
+            data = ["\n"]
             for element in data:
                 my_open.write(element)
             my_open.close()
-            if num_episodes >= 10:
+            if num_episodes >= 1:
                 exit()
 
     print(time.time())

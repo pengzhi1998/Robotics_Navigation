@@ -67,7 +67,7 @@ start_goal_pos_1 = [14., -2.5, -15, 0., 270., 0., 5, -2.5, -5] # test0
 start_goal_pos_2 = [-10, -2.5, 0] # test0
 start_goal_pos_3 = [-10, -2.5, 10] # test0
 start_goal_pos_4 = [-20, -2.5, 20] # test0
-start_goal_pos_5 = [-10, -2.5, 50] # test0
+start_goal_pos_5 = [-10, -2.5, 40] # test0
 start_goal_pos = start_goal_pos_1 + start_goal_pos_2 + start_goal_pos_3 + start_goal_pos_4 + start_goal_pos_5
 
 

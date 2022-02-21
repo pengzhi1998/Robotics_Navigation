@@ -365,7 +365,7 @@ class Underwater_navigation():
                     reward_goal_reached = 0
 
             else:
-                if obs_goal_depthfromwater[0] < 10.:
+                if obs_goal_depthfromwater[0] < .8:
                     reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
                     done = True
                     self.waypoint += 1
@@ -403,7 +403,12 @@ class Underwater_navigation():
         self.step_count += 1
         # print(self.step_count)
 
-        if self.step_count > 3000:
+        if self.step_count >= 1000:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+            data = [str(self.step_count), " failed", "\n"]
+            for element in data:
+                my_open.write(element)
+            my_open.close()
             done = True
             print("Exceeds the max num_step...")
 
@@ -445,13 +450,13 @@ class Underwater_navigation():
         # cv2.imwrite("img_rgb_step.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_step.png", 256 * self.obs_preddepths[0])
 
-        # if self.training == False:
-        #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-        #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-        #             str(obs_goal_depthfromwater[3]), "\n"]
-        #     for element in data:
-        #         my_open.write(element)
-        #     my_open.close()
+        if self.training == False:
+            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                    str(obs_goal_depthfromwater[3]), "\n"]
+            for element in data:
+                my_open.write(element)
+            my_open.close()
 
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, reward, done, 0
 

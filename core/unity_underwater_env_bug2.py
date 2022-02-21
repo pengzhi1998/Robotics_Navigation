@@ -285,6 +285,7 @@ class Underwater_navigation_Bug2():
         self.done = False
         # 0 turning to the goal, 1 moving towards the goal, 2 when near the obstacle, turn to a
         self.mode = 0
+        self.data = []
 
         # cv2.imwrite("img_rgb_reset.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_reset.png", 256 * self.obs_preddepths[0])
@@ -296,6 +297,15 @@ class Underwater_navigation_Bug2():
         distance = obs_goal_depthfromwater[0]
         angle = obs_goal_depthfromwater[2]
         while distance > 0.8:
+            if self.step_count >= 1000:
+                my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                data = [str(self.step_count), " failed", "\n"]
+                for element in data:
+                    my_open.write(element)
+                my_open.close()
+                print("Exceeds the max num_step...")
+                done = True
+                break
             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
             distance = obs_goal_depthfromwater[0]
             angle = obs_goal_depthfromwater[2]
@@ -307,10 +317,13 @@ class Underwater_navigation_Bug2():
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                 self.step_count += 1
+                if self.step_count >= 1000:
+                    print("Exceeds the max num_step...")
+                    break
                 # if self.training == False:
                 #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                #             str(obs_goal_depthfromwater[3]), "\n"]
+                self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                            str(obs_goal_depthfromwater[3]), "\n"]
                 #     for element in data:
                 #         my_open.write(element)
                 #     my_open.close()
@@ -322,10 +335,13 @@ class Underwater_navigation_Bug2():
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                 self.step_count += 1
+                if self.step_count >= 1000:
+                    print("Exceeds the max num_step...")
+                    break
                 # if self.training == False:
                 #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                #             str(obs_goal_depthfromwater[3]), "\n"]
+                self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                              str(obs_goal_depthfromwater[3]), "\n"]
                 #     for element in data:
                 #         my_open.write(element)
                 #     my_open.close()
@@ -340,7 +356,7 @@ class Underwater_navigation_Bug2():
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                 distance = obs_goal_depthfromwater[0]
                 if self.waypoint == 4:
-                    if distance < 10:
+                    if distance < 0.8:
                         break
                 self.obs_img_ray, _, done, _ = self.env.step([0, 0, 1])
                 sounder = self.obs_img_ray[1]
@@ -349,17 +365,20 @@ class Underwater_navigation_Bug2():
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                 self.step_count += 1
+                if self.step_count >= 1000:
+                    print("Exceeds the max num_step...")
+                    break
                 # if self.training == False:
                 #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                #             str(obs_goal_depthfromwater[3]), "\n"]
+                self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                              str(obs_goal_depthfromwater[3]), "\n"]
                 #     for element in data:
                 #         my_open.write(element)
                 #     my_open.close()
             if distance < 0.8:
                 break
             if self.waypoint == 4:
-                if distance < 10:
+                if distance < 0.8:
                     break
 
             # follow the wall until the robot reaches the intersection line
@@ -378,9 +397,12 @@ class Underwater_navigation_Bug2():
 
                     if self.training == False:
                         self.step_count += 1
+                        if self.step_count >= 1000:
+                            print("Exceeds the max num_step...")
+                            break
                         # my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                        # data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                        #         str(obs_goal_depthfromwater[3]), "\n"]
+                        self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                      str(obs_goal_depthfromwater[3]), "\n"]
                         # for element in data:
                         #     my_open.write(element)
                         # my_open.close()
@@ -394,10 +416,13 @@ class Underwater_navigation_Bug2():
                     obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                     self.step_count += 1
+                    if self.step_count >= 1000:
+                        print("Exceeds the max num_step...")
+                        break
                     # if self.training == False:
                     #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                    #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                    #             str(obs_goal_depthfromwater[3]), "\n"]
+                    self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                  str(obs_goal_depthfromwater[3]), "\n"]
                     #     for element in data:
                     #         my_open.write(element)
                     #     my_open.close()
@@ -427,10 +452,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -447,10 +475,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -467,10 +498,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -492,10 +526,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -512,10 +549,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -532,10 +572,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -560,10 +603,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -580,10 +626,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -600,10 +649,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -625,10 +677,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -645,10 +700,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -665,10 +723,13 @@ class Underwater_navigation_Bug2():
                             obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                             self.step_count += 1
+                            if self.step_count >= 1000:
+                                print("Exceeds the max num_step...")
+                                break
                             # if self.training == False:
                             #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                            #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                            #             str(obs_goal_depthfromwater[3]), "\n"]
+                            self.data += [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+                                          str(obs_goal_depthfromwater[3]), "\n"]
                             #     for element in data:
                             #         my_open.write(element)
                             #     my_open.close()
@@ -720,6 +781,7 @@ class Underwater_navigation_Bug2():
         else:
             if self.waypoint != 4:
                 if obs_goal_depthfromwater[0] < 0.8:
+                    self.data += ["\n"]
                     reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
                     done = True
                     self.waypoint += 1
@@ -740,9 +802,13 @@ class Underwater_navigation_Bug2():
                     reward_goal_reached = 0
 
             else:
-                if obs_goal_depthfromwater[0] < 10.:
+                if obs_goal_depthfromwater[0] < 0.8:
                     reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
                     done = True
+                    my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                    for element in self.data:
+                        my_open.write(element)
+                    my_open.close()
                     self.waypoint += 1
                     print("Reached the goal area!")
                     if self.waypoint == 5:
@@ -756,5 +822,8 @@ class Underwater_navigation_Bug2():
                                                                 self.start_goal_pos[9 + 3 * (self.waypoint -1) : 9 + 3 * self.waypoint] + [20])
                 else:
                     reward_goal_reached = 0
+
+        if self.step_count >= 1000:
+            done = True
 
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, 0, done, 0
