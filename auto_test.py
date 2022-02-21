@@ -14,7 +14,7 @@ for i in env:
                 my_open.write(element)
             my_open.close()
             os.system('{} {} --env-name=navigation --hist-length=5 --depth-prediction-model=midas --scene-name={} '
-                      '--visibility={} --model-path={} --eval-batch-size=20000 '
+                      '--visibility={} --model-path={} --eval-batch-size=100000 '
                       '--adaptation=0 --randomization=0'.format('python3', cwd, i, j, k))
             my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
             data = ["\n"]

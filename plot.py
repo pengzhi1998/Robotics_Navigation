@@ -28,17 +28,18 @@ for data in whole_data:
     succ_num = 0.
     steps = []
     for i in range(len(data)):
-        if data[i][0] == 'success':
-            succ_num += 1.
-            steps.append(float(data[i][1])/2)
+        if i != 0:
+            if data[i][0] == 'success':
+                succ_num += 1.
+                steps.append(float(data[i][1])/2)
     if len(steps) == 0:
         steps.append(0)
-    successful_ratio = succ_num/10.0
+    successful_ratio = succ_num/100.0
     rewards = [float(i[2]) for i in data]
-    print(t, np.round(np.mean(rewards), 2), np.round(np.std(rewards), 2), np.round(np.mean(steps), 2),
+    print(t, np.round(np.mean(rewards[1:-1]), 2), np.round(np.std(rewards[1:-1]), 2), np.round(np.mean(steps), 2),
         np.round(np.std(steps), 2), successful_ratio)
     _plotdata.append([
-        t, np.round(np.mean(rewards), 2), np.round(np.std(rewards), 2), np.round(np.mean(steps), 2),
+        t, np.round(np.mean(rewards[1:-1]), 2), np.round(np.std(rewards[1:-1]), 2), np.round(np.mean(steps), 2),
         np.round(np.std(steps), 2), successful_ratio * 100
     ])
     t += 1
