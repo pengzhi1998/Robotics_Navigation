@@ -123,7 +123,7 @@ def collect_samples(pid, queue, env, policy, custom_reward,
             for element in data:
                 my_open.write(element)
             my_open.close()
-            if num_episodes >= 1:
+            if num_episodes >= 101:
                 exit()
 
     print(time.time())

@@ -18,30 +18,34 @@ for line in lines:
             line = line.strip("\n").split()
             data_onetrajectory.append(line)
     else:
-        if data_onetrajectory[0][1] == 'failed':
-            pass
-        else:
-            data_onemodel.append(data_onetrajectory)
+        data_onemodel.append(data_onetrajectory)
         data_onetrajectory = []
     t += 1
 data_onemodel.append(data_onetrajectory)
 whole_data.append(data_onemodel)
-print(np.shape(whole_data), whole_data)
+# print(np.shape(whole_data), whole_data)
 
 data = []
+data_success = 0
 for data_onemodel in whole_data:
     for wp in range(5):
         data_model_wp = []
         for data_onetrajectory in data_onemodel:
             if wp == 0:
-                data_piece = float(data_onetrajectory[wp][0])/2.
+                if data_onetrajectory[wp][1] == "Success":
+                    data_piece = float(data_onetrajectory[wp][0])/2.
+                    data_model_wp.append(data_piece)
             else:
-                data_piece = (float(data_onetrajectory[wp][0]) - float(data_onetrajectory[wp-1][0]))/2.
-            data_model_wp.append(data_piece)
+                if data_onetrajectory[wp][1] == "Success":
+                    data_piece = (float(data_onetrajectory[wp][0]) - float(data_onetrajectory[wp-1][0]))/2.
+                    data_model_wp.append(data_piece)
+            # print(data_model_wp)
+            if wp == 4 and data_onetrajectory[wp][1] == "Success":
+                data_success += 1.
         print(np.round(np.mean(data_model_wp), 2), np.round(np.std(data_model_wp), 2))
         data.append(data_model_wp)
-
-print(data)
+    print(data_success/100.)
+    data_success = 0
 
 
 

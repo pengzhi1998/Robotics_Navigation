@@ -805,10 +805,10 @@ class Underwater_navigation_Bug2():
                 if obs_goal_depthfromwater[0] < 0.8:
                     reward_goal_reached = 10 - 8 * np.abs(obs_goal_depthfromwater[1]) - np.abs(np.deg2rad(obs_goal_depthfromwater[2]))
                     done = True
-                    my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-                    for element in self.data:
-                        my_open.write(element)
-                    my_open.close()
+                    # my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+                    # for element in self.data:
+                    #     my_open.write(element)
+                    # my_open.close()
                     self.waypoint += 1
                     print("Reached the goal area!")
                     if self.waypoint == 5:

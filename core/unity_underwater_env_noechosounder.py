@@ -450,13 +450,13 @@ class Underwater_navigation():
         # cv2.imwrite("img_rgb_step.png", 256 * cv2.cvtColor(obs_img_ray[0] ** 0.45, cv2.COLOR_RGB2BGR))
         # cv2.imwrite("img_depth_pred_step.png", 256 * self.obs_preddepths[0])
 
-        if self.training == False:
-            my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
-            data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
-                    str(obs_goal_depthfromwater[3]), "\n"]
-            for element in data:
-                my_open.write(element)
-            my_open.close()
+        # if self.training == False:
+        #     my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos.txt'), "a")
+        #     data = [str(obs_goal_depthfromwater[4]), " ", str(obs_goal_depthfromwater[5]), " ",
+        #             str(obs_goal_depthfromwater[3]), "\n"]
+        #     for element in data:
+        #         my_open.write(element)
+        #     my_open.close()
 
         return self.obs_preddepths, self.obs_goals, self.obs_rays, self.obs_actions, reward, done, 0
 
