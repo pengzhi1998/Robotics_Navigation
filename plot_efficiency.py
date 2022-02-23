@@ -3,6 +3,7 @@ import os
 from utils import *
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import matplotlib.lines as mlines
 
 my_open = open(os.path.join(assets_dir(), 'learned_models/test_pos_plot_efficiency.txt'), "r")
@@ -176,6 +177,245 @@ plt.grid(axis='y')
 plt.savefig("./assets/learned_models/withbug2.pdf")
 plt.show()
 
+fig, ax = plt.subplots()
+x, y, length = [], [], []
+t = 0
+for wp in path_withechosounder:
+    length.append(len(wp))
+    for i in range(len(wp) - 1):
+        x.append(wp[i][0])
+        y.append(wp[i][1])
+    t += 1
 
+length[4] += length[3] + length[2] + length[1] + length[0]
+length[3] += length[2] + length[1] + length[0]
+length[2] += length[1] + length[0]
+length[1] += length[0]
 
+line1, = ax.plot(x, y, linewidth = 2, color = colors[0])
+line2, = ax.plot(x, y, linewidth = 2, color = colors[1])
+line3, = ax.plot(x, y, linewidth = 2, color = colors[2])
+line4, = ax.plot(x, y, linewidth = 2, color = colors[3])
+line5, = ax.plot(x, y, linewidth = 2, color = colors[4])
 
+def animate(i, x, y, line1, line2, line3, line4, line5, length):
+    if i < length[0]:
+        line1.set_data(x[:i], y[:i])
+        line2.set_data([], [])
+        line3.set_data([], [])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[1]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:i], y[length[0]:i])
+        line3.set_data([], [])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[2]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:i], y[length[1]:i])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[3]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:length[2]], y[length[1]:length[2]])
+        line4.set_data(x[length[2]:i], y[length[2]:i])
+        line5.set_data([], [])
+    else:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:length[2]], y[length[1]:length[2]])
+        line4.set_data(x[length[2]:length[3]], y[length[2]:length[3]])
+        line5.set_data(x[length[3]:i], y[length[3]:i])
+
+circle1 = plt.Circle((14, -15), 1, color='g')
+circle1.set_zorder(1000)
+plt.gca().add_patch(circle1)
+plt.plot(11.2, -10.3, color='k', marker='o', markersize=8)
+plt.plot(-3.01, -12.88, color='k', marker='o', markersize=8)
+plt.plot(-12.96, -9.97, color='k', marker='o', markersize=8)
+plt.plot(1.65, -4.75, color='k', marker='o', markersize=8)
+plt.plot(-9.58, -2.21, color='k', marker='o', markersize=8)
+plt.plot(-19.93, -3.11, color='k', marker='o', markersize=8)
+plt.plot(8.65, 3.82, color='k', marker='o', markersize=8)
+plt.plot(-2.53, 4.18, color='k', marker='o', markersize=8)
+plt.plot(-20.13, 12.2, color='k', marker='o', markersize=8)
+plt.plot(-14.07, 13.6, color='k', marker='o', markersize=8)
+plt.plot(0.43, 14.04, color='k', marker='o', markersize=8)
+plt.plot(7.73, 10.07, color='k', marker='o', markersize=8)
+plt.plot(14.19, 13.17, color='k', marker='o', markersize=8)
+
+plt.axis('scaled')
+plt.xticks(size=12)
+plt.yticks(size=12)
+plt.grid(axis='x')
+plt.grid(axis='y')
+ani = animation.FuncAnimation(fig, animate, len(x),
+                              fargs=[x, y, line1, line2, line3, line4,
+                                     line5, length], interval=.5)
+ani.save("./assets/learned_models/withechosounder.gif", writer='pillow')
+plt.show()
+
+fig, ax = plt.subplots()
+x, y, length = [], [], []
+t = 0
+for wp in path_withoutechosounder:
+    length.append(len(wp))
+    for i in range(len(wp) - 1):
+        x.append(wp[i][0])
+        y.append(wp[i][1])
+    t += 1
+
+length[4] += length[3] + length[2] + length[1] + length[0]
+length[3] += length[2] + length[1] + length[0]
+length[2] += length[1] + length[0]
+length[1] += length[0]
+
+line1, = ax.plot(x, y, linewidth = 2, color = colors[0])
+line2, = ax.plot(x, y, linewidth = 2, color = colors[1])
+line3, = ax.plot(x, y, linewidth = 2, color = colors[2])
+line4, = ax.plot(x, y, linewidth = 2, color = colors[3])
+line5, = ax.plot(x, y, linewidth = 2, color = colors[4])
+
+def animate(i, x, y, line1, line2, line3, line4, line5, length):
+    if i < length[0]:
+        line1.set_data(x[:i], y[:i])
+        line2.set_data([], [])
+        line3.set_data([], [])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[1]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:i], y[length[0]:i])
+        line3.set_data([], [])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[2]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:i], y[length[1]:i])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[3]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:length[2]], y[length[1]:length[2]])
+        line4.set_data(x[length[2]:i], y[length[2]:i])
+        line5.set_data([], [])
+    else:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:length[2]], y[length[1]:length[2]])
+        line4.set_data(x[length[2]:length[3]], y[length[2]:length[3]])
+        line5.set_data(x[length[3]:i], y[length[3]:i])
+
+circle1 = plt.Circle((14, -15), 1, color='g')
+circle1.set_zorder(1000)
+plt.gca().add_patch(circle1)
+plt.plot(11.2, -10.3, color='k', marker='o', markersize=8)
+plt.plot(-3.01, -12.88, color='k', marker='o', markersize=8)
+plt.plot(-12.96, -9.97, color='k', marker='o', markersize=8)
+plt.plot(1.65, -4.75, color='k', marker='o', markersize=8)
+plt.plot(-9.58, -2.21, color='k', marker='o', markersize=8)
+plt.plot(-19.93, -3.11, color='k', marker='o', markersize=8)
+plt.plot(8.65, 3.82, color='k', marker='o', markersize=8)
+plt.plot(-2.53, 4.18, color='k', marker='o', markersize=8)
+plt.plot(-20.13, 12.2, color='k', marker='o', markersize=8)
+plt.plot(-14.07, 13.6, color='k', marker='o', markersize=8)
+plt.plot(0.43, 14.04, color='k', marker='o', markersize=8)
+plt.plot(7.73, 10.07, color='k', marker='o', markersize=8)
+plt.plot(14.19, 13.17, color='k', marker='o', markersize=8)
+
+plt.axis('scaled')
+plt.xticks(size=12)
+plt.yticks(size=12)
+plt.grid(axis='x')
+plt.grid(axis='y')
+ani = animation.FuncAnimation(fig, animate, len(x),
+                              fargs=[x, y, line1, line2, line3, line4,
+                                     line5, length], interval=.5)
+ani.save("./assets/learned_models/withoutechosounder.gif", writer='pillow')
+plt.show()
+
+fig, ax = plt.subplots()
+x, y, length = [], [], []
+t = 0
+for wp in path_bug2:
+    length.append(len(wp))
+    for i in range(len(wp) - 1):
+        x.append(wp[i][0])
+        y.append(wp[i][1])
+    t += 1
+
+length[4] += length[3] + length[2] + length[1] + length[0]
+length[3] += length[2] + length[1] + length[0]
+length[2] += length[1] + length[0]
+length[1] += length[0]
+
+line1, = ax.plot(x, y, linewidth = 2, color = colors[0])
+line2, = ax.plot(x, y, linewidth = 2, color = colors[1])
+line3, = ax.plot(x, y, linewidth = 2, color = colors[2])
+line4, = ax.plot(x, y, linewidth = 2, color = colors[3])
+line5, = ax.plot(x, y, linewidth = 2, color = colors[4])
+
+def animate(i, x, y, line1, line2, line3, line4, line5, length):
+    if i < length[0]:
+        line1.set_data(x[:i], y[:i])
+        line2.set_data([], [])
+        line3.set_data([], [])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[1]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:i], y[length[0]:i])
+        line3.set_data([], [])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[2]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:i], y[length[1]:i])
+        line4.set_data([], [])
+        line5.set_data([], [])
+    elif i < length[3]:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:length[2]], y[length[1]:length[2]])
+        line4.set_data(x[length[2]:i], y[length[2]:i])
+        line5.set_data([], [])
+    else:
+        line1.set_data(x[0:length[0]], y[0:length[0]])
+        line2.set_data(x[length[0]:length[1]], y[length[0]:length[1]])
+        line3.set_data(x[length[1]:length[2]], y[length[1]:length[2]])
+        line4.set_data(x[length[2]:length[3]], y[length[2]:length[3]])
+        line5.set_data(x[length[3]:i], y[length[3]:i])
+
+circle1 = plt.Circle((14, -15), 1, color='g')
+circle1.set_zorder(1000)
+plt.gca().add_patch(circle1)
+plt.plot(11.2, -10.3, color='k', marker='o', markersize=8)
+plt.plot(-3.01, -12.88, color='k', marker='o', markersize=8)
+plt.plot(-12.96, -9.97, color='k', marker='o', markersize=8)
+plt.plot(1.65, -4.75, color='k', marker='o', markersize=8)
+plt.plot(-9.58, -2.21, color='k', marker='o', markersize=8)
+plt.plot(-19.93, -3.11, color='k', marker='o', markersize=8)
+plt.plot(8.65, 3.82, color='k', marker='o', markersize=8)
+plt.plot(-2.53, 4.18, color='k', marker='o', markersize=8)
+plt.plot(-20.13, 12.2, color='k', marker='o', markersize=8)
+plt.plot(-14.07, 13.6, color='k', marker='o', markersize=8)
+plt.plot(0.43, 14.04, color='k', marker='o', markersize=8)
+plt.plot(7.73, 10.07, color='k', marker='o', markersize=8)
+plt.plot(14.19, 13.17, color='k', marker='o', markersize=8)
+
+plt.axis('scaled')
+plt.xticks(size=12)
+plt.yticks(size=12)
+plt.grid(axis='x')
+plt.grid(axis='y')
+ani = animation.FuncAnimation(fig, animate, len(x),
+                              fargs=[x, y, line1, line2, line3, line4,
+                                     line5, length], interval=.5)
+ani.save("./assets/learned_models/withbug2.gif", writer='pillow')
+plt.show()
