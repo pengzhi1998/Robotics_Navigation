@@ -252,6 +252,17 @@ plt.xticks(size=12)
 plt.yticks(size=12)
 plt.grid(axis='x')
 plt.grid(axis='y')
+d_line = mlines.Line2D([], [], color='dodgerblue',
+                          markersize=15, label='Path 1')
+g_line = mlines.Line2D([], [], color='g',
+                          markersize=15, label='Path 2')
+m_line = mlines.Line2D([], [], color='m',
+                          markersize=15, label='Path 3')
+r_line = mlines.Line2D([], [], color='r',
+                          markersize=15, label='Path 4')
+c_line = mlines.Line2D([], [], color='c',
+                          markersize=15, label='Path 5')
+plt.legend(handles=[d_line, g_line, m_line, r_line, c_line])
 ani = animation.FuncAnimation(fig, animate, len(x),
                               fargs=[x, y, line1, line2, line3, line4,
                                      line5, length], interval=.5)
