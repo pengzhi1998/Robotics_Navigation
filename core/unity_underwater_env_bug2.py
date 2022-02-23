@@ -313,7 +313,7 @@ class Underwater_navigation_Bug2():
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                 distance = obs_goal_depthfromwater[0]
                 angle = obs_goal_depthfromwater[2]
-                self.obs_img_ray, _, done, _ = self.env.step([0, 0.2 * self.twist_range, 0])
+                self.obs_img_ray, _, done, _ = self.env.step([0, 0.16 * self.twist_range, 0])
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                 self.step_count += 1
@@ -331,7 +331,7 @@ class Underwater_navigation_Bug2():
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
                 distance = obs_goal_depthfromwater[0]
                 angle = obs_goal_depthfromwater[2]
-                self.obs_img_ray, _, done, _ = self.env.step([0, -0.2 * self.twist_range, 0])
+                self.obs_img_ray, _, done, _ = self.env.step([0, -0.16 * self.twist_range, 0])
                 obs_goal_depthfromwater = np.array(self.pos_info.goal_depthfromwater_info())
 
                 self.step_count += 1
