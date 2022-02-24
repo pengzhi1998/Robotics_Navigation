@@ -36,10 +36,10 @@ for data in whole_data:
         steps.append(0)
     successful_ratio = succ_num/100.0
     rewards = [float(i[2]) for i in data]
-    print(t, np.round(np.mean(rewards[1:-1]), 2), np.round(np.std(rewards[1:-1]), 2), np.round(np.mean(steps), 2),
+    print(t, np.round(np.mean(rewards[1:]), 2), np.round(np.std(rewards[1:]), 2), np.round(np.mean(steps), 2),
         np.round(np.std(steps), 2), successful_ratio)
     _plotdata.append([
-        t, np.round(np.mean(rewards[1:-1]), 2), np.round(np.std(rewards[1:-1]), 2), np.round(np.mean(steps), 2),
+        t, np.round(np.mean(rewards[1:]), 2), np.round(np.std(rewards[1:]), 2), np.round(np.mean(steps), 2),
         np.round(np.std(steps), 2), successful_ratio * 100
     ])
     t += 1
