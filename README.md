@@ -1,6 +1,8 @@
 ## Underwater Navigation
 Source code for paper *Monocular Camera and Single-Beam Sonar-Based Underwater Collision-Free 
 Navigation with Domain Randomization*.
+The PPO implementation and the underwater env are referred to [PyTorch-RL](https://github.com/Khrylx/PyTorch-RL.git), and 
+[Optically-Realistic-Water](https://github.com/muckSponge/Optically-Realistic-Water) respectively
 ### Installation
 ```
 virtualenv --no-site-packages UW_nav --python=python3.6
