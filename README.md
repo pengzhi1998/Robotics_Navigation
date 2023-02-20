@@ -14,6 +14,11 @@ cd ./ml-agents
 pip install -e ./ml-agents-envs
 pip install gym-unity==0.27.0
 ```
+To build the Unity environment, clone [this repository](https://github.com/hdacnw/Underwater-RL/tree/b0710e3b79a579b66a157429658b3418d5b2b739)
+(indicated as a submodule named *Unity* in our repository). Build the **SampleScene** and
+choose `./Robotics_Navigation/underwater_env/` as the path. Besides, download [dpt_large-midas-2f21e586.pt](https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt)
+to the path `./Robotics_Navigation/DPT/weights`.
+
 ### Training
 <!--
 ## Dependencies
